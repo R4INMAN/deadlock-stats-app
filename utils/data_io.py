@@ -63,7 +63,24 @@ def add_match(match_dict):
     matches = load_matches()
     matches.append(match_dict)
     save_matches(matches)
+    
+def update_match(match_id, new_match_dict):
+    matches = load_matches()
+    for i, m in enumerate(matches):
+        if m["match_id"] == match_id:
+            matches[i] = new_match_dict
+            save_matches(matches)
+            return True
+    return False
 
+
+def delete_match(match_id):
+    matches = load_matches()
+    new_matches = [m for m in matches if m["match_id"] != match_id]
+    if len(new_matches) != len(matches):
+        save_matches(new_matches)
+        return True
+    return False
 
 def add_player(name, notes=""):
     players = load_players()
