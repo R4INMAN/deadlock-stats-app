@@ -1,4 +1,5 @@
 import colorsys
+import math
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -98,16 +99,35 @@ else:
     pivot = timeline.set_index(["hero", "match_seq"])["participation_rate"].reindex(full_index) * 100
 
     all_vals = pivot.dropna()
-    y_min = max(0, all_vals.min() - 8)
-    y_max = min(100, all_vals.max() + 8)
     x_span = max(1, seqs[-1] - seqs[0])
-    y_span = max(1, y_max - y_min)
 
-    # Approximate plot box, used to size the portraits squarely in data units.
+    # Approximate plot box, used to size the portraits squarely in data units. Each portrait
+    # sits on a slightly larger disc, and that disc - not the icon - is what has to clear its
+    # neighbours, so spacing is derived from it rather than from a hand-tuned constant.
     plot_w, plot_h = 1080, 470
     icon_px = 34
+    disc_px = icon_px + 7
+
+    # The axis is padded past the data by half a portrait, so a disc sitting on a line that
+    # touches 100% isn't sliced off by the top of the plot. Ticks stay inside 0-100 so the
+    # padding never shows up as a meaningless "105%" label.
+    pad = max(1.0, (all_vals.max() - all_vals.min()) * 0.10)
+    tick_lo = max(0.0, all_vals.min() - pad)
+    tick_hi = min(100.0, all_vals.max() + pad)
+    disc_h = max(1.0, tick_hi - tick_lo) * (disc_px / plot_h)
+    y_min = tick_lo - disc_h * 0.75
+    y_max = tick_hi + disc_h * 0.75
+    y_span = max(1, y_max - y_min)
+
+    tick_step = 5 if (tick_hi - tick_lo) <= 50 else 10
+    tick_vals = [t for t in range(0, 101, tick_step) if y_min <= t <= y_max]
+
     size_x = x_span * (icon_px / plot_w)
     size_y = y_span * (icon_px / plot_h)
+
+    x_axis_lo = seqs[0] + 1 - x_span * 0.02
+    x_axis_hi = seqs[-1] + 1 + x_span * 0.06
+    x_axis_span = max(1e-9, x_axis_hi - x_axis_lo)
 
     fig = go.Figure()
     endpoints = []
@@ -119,10 +139,15 @@ else:
         run = series.notna().ne(series.notna().shift()).cumsum()
         for _, seg in series.groupby(run):
             if seg.notna().all():
-                smoothed.loc[seg.index] = seg.ewm(span=5, adjust=False).mean()
+                smooth_seg = seg.ewm(span=5, adjust=False).mean()
+                smoothed.loc[seg.index] = smooth_seg
                 # One portrait per run, so a hero that drops out and climbs back is labelled
-                # both times rather than leaving an anonymous stub earlier in the chart.
-                endpoints.append((hero, seg.index[-1] + 1, float(smoothed.loc[seg.index[-1]])))
+                # both times rather than leaving an anonymous stub earlier in the chart. The
+                # whole run is kept, because a crowded portrait slides back along it.
+                endpoints.append({
+                    "hero": hero,
+                    "points": [(int(i) + 1, float(v)) for i, v in smooth_seg.items()],
+                })
 
         fig.add_trace(go.Scatter(
             x=[s + 1 for s in smoothed.index], y=smoothed.values,
@@ -132,17 +157,43 @@ else:
             hovertemplate=f"<b>{hero}</b><br>%{{y:.0f}}% of drafts<extra></extra>",
         ))
 
-    # Nudge portraits apart when several lines end at the same place, so none is hidden.
-    # Walking bottom-up and pushing each one clear of the highest portrait it collides with
-    # makes a stack of overlapping endpoints fan out instead of piling onto one spot.
-    endpoints.sort(key=lambda e: e[2])
-    for i, (hero, ex, ey) in enumerate(endpoints):
-        for _, px_, py_ in endpoints[:i]:
-            if abs(ex - px_) < x_span * 0.04 and ey < py_ + size_y:
-                ey = py_ + size_y
-        endpoints[i] = (hero, ex, ey)
+    # Place each portrait on its own line rather than beside it: start at the line's end and,
+    # if that spot is already taken, walk backwards along the line until the portrait clears
+    # its neighbours. Because every candidate is a point on the curve, the portrait always sits
+    # on the line it belongs to - no connector needed to explain which line it labels - and a
+    # crowded pair separates along the direction its lines are already travelling.
+    def to_px(x, y):
+        return ((x - x_axis_lo) / x_axis_span * plot_w, (y - y_min) / y_span * plot_h)
 
-    for hero, ex, ey in endpoints:
+    min_sep = disc_px + 2
+    placed_px = []
+    # Rightmost first, lowest first among ties, so the most recent point keeps the line's end
+    # and everything crowding it is the thing that gives way.
+    for ep in sorted(endpoints, key=lambda e: (-e["points"][-1][0], e["points"][-1][1])):
+        best, best_clearance = None, -1.0
+        for cx, cy in reversed(ep["points"]):
+            cpx, cpy = to_px(cx, cy)
+            clearance = min(
+                (math.hypot(cpx - qx, cpy - qy) for qx, qy in placed_px),
+                default=math.inf,
+            )
+            if clearance > best_clearance:
+                best, best_clearance = (cx, cy, cpx, cpy), clearance
+            if clearance >= min_sep:
+                break
+        cx, cy, cpx, cpy = best
+        placed_px.append((cpx, cpy))
+        ep["label_x"], ep["label_y"] = cx, cy
+
+    fig.add_trace(go.Scatter(
+        x=[ep["label_x"] for ep in endpoints], y=[ep["label_y"] for ep in endpoints],
+        mode="markers", showlegend=False, hoverinfo="skip",
+        marker=dict(size=disc_px, color=[color_map[ep["hero"]] for ep in endpoints],
+                     line=dict(width=0)),
+    ))
+
+    for ep in endpoints:
+        hero, ex, ey = ep["hero"], ep["label_x"], ep["label_y"]
         icon = data_io.hero_icon_data_uri((visuals.get(hero) or {}).get("icon"))
         if icon:
             fig.add_layout_image(dict(
@@ -160,11 +211,13 @@ else:
         xaxis=dict(
             title="Match number (oldest to most recent)",
             showgrid=False, zeroline=False, showline=True, linecolor="rgba(128,128,128,0.35)",
-            range=[seqs[0] + 1 - x_span * 0.02, seqs[-1] + 1 + x_span * 0.06],
+            range=[x_axis_lo, x_axis_hi],
         ),
         yaxis=dict(
             title="Share of drafts picked or banned",
-            ticksuffix="%", range=[y_min, y_max],
+            range=[y_min, y_max],
+            # ticksuffix is ignored under tickmode="array", so the % goes in the label text.
+            tickmode="array", tickvals=tick_vals, ticktext=[f"{t}%" for t in tick_vals],
             gridcolor="rgba(128,128,128,0.18)", zeroline=False,
         ),
         margin=dict(l=70, r=40, t=30, b=60),
