@@ -82,6 +82,15 @@ def player_summary_table(df):
     return g.sort_values("win_rate", ascending=False)
 
 
+def winrate_leaderboard(df, min_games=10, top_n=10):
+    """Top N players by win rate, qualified by a minimum games-played threshold."""
+    summary = player_summary_table(df)
+    if summary.empty:
+        return summary
+    qualified = summary[summary["games"] >= min_games]
+    return qualified.sort_values(["win_rate", "games"], ascending=[False, False]).head(top_n)
+
+
 def player_detail(df, player, total_matches):
     pdf = df[df["player"] == player]
     if pdf.empty:
