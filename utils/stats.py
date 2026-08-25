@@ -146,13 +146,18 @@ def hero_summary_table(df, total_matches, matches=None, heroes_list=None):
             counts = hdf["player"].value_counts()
             top_player = counts.index[0]
             top_player_games = int(counts.iloc[0])
+        pick_rate = games / total_matches
+        ban_rate = ban_counts.get(hero, 0) / total_matches
         rows.append({
             "hero": hero,
             "games": games,
             "win_rate": (wins / games) if games else None,
-            "pick_rate": games / total_matches,
-            "ban_rate": (ban_counts.get(hero, 0) / total_matches),
+            "pick_rate": pick_rate,
+            "ban_rate": ban_rate,
             "first_pick_rate": (fp_counts.get(hero, 0) / total_matches),
+            # A hero is never both picked and banned in the same match, so pick_rate + ban_rate
+            # is exactly "picked or banned at any point in the draft" with no double-counting.
+            "draft_participation_rate": pick_rate + ban_rate,
             "mvp_count": int(hdf["mvp"].sum()) if games else 0,
             "key_player_count": int(hdf["key_player"].sum()) if games else 0,
             "top_player": top_player,
@@ -162,7 +167,7 @@ def hero_summary_table(df, total_matches, matches=None, heroes_list=None):
     return pd.DataFrame(rows).sort_values("games", ascending=False)
 
 
-def hero_detail(df, hero, total_matches):
+def hero_detail(df, hero, total_matches, matches=None):
     hdf = df[df["hero"] == hero]
     player_breakdown = hdf.groupby("player").agg(
         games=("win", "size"), wins=("win", "sum"), avg_kp_pct=("kp_pct", "mean"),
@@ -170,9 +175,103 @@ def hero_detail(df, hero, total_matches):
     if not player_breakdown.empty:
         player_breakdown["win_rate"] = player_breakdown["wins"] / player_breakdown["games"]
         player_breakdown = player_breakdown.sort_values("games", ascending=False)
+
+    ban_counts, _ = ban_first_pick_counts(matches or [])
+    ban_rate = (ban_counts.get(hero, 0) / total_matches) if total_matches else None
+    pick_rate = len(hdf) / total_matches if total_matches else None
+
     return {
         "games": len(hdf),
         "win_rate": hdf["win"].mean() if len(hdf) else None,
-        "pick_rate": len(hdf) / total_matches if total_matches else None,
+        "pick_rate": pick_rate,
+        "ban_rate": ban_rate,
+        "draft_participation_rate": (pick_rate + ban_rate) if total_matches else None,
         "player_breakdown": player_breakdown,
     }
+
+
+DRAFT_STATUS_TIERS = ("banned", "first_pick", "picked")
+
+
+def match_hero_events(matches):
+    """One row per (match, hero) that showed up in that match's draft (banned or picked),
+    tagged with the strongest tier it showed up in: banned > first_pick > picked."""
+    rows = []
+    for seq, m in enumerate(matches):
+        bans = set(m.get("bans", []))
+        first_picks = set(m.get("first_picks", []))
+        picks = {p["hero"] for p in m["players"]}
+        other_picks = picks - first_picks
+        for hero in bans:
+            rows.append({"match_seq": seq, "match_id": m["match_id"], "hero": hero, "status": "banned"})
+        for hero in first_picks:
+            rows.append({"match_seq": seq, "match_id": m["match_id"], "hero": hero, "status": "first_pick"})
+        for hero in other_picks:
+            rows.append({"match_seq": seq, "match_id": m["match_id"], "hero": hero, "status": "picked"})
+    return pd.DataFrame(rows, columns=["match_seq", "match_id", "hero", "status"])
+
+
+def draft_participation_timeline(matches, window=25, top_n=5, min_streak=5):
+    """Rolling (trailing-window) draft participation rate per hero, at each point in match
+    sequence, restricted to that window's top N heroes.
+
+    Matches aren't dated in this dataset, so "time" here is match order (roughly chronological,
+    since match IDs are assigned sequentially) rather than a calendar axis.
+
+    Ties in participation rate are broken by draft strength signal: heroes banned outright rank
+    above heroes taken as a first pick, which rank above heroes picked later in the draft -
+    mirroring how contested a hero was, strongest to weakest.
+
+    Two noise filters keep the chart readable rather than exhaustive:
+      - The first `window - 1` matches are dropped. Before a full window has elapsed the rate is
+        computed over a handful of matches, so it swings between 0% and 100% on a single draft -
+        those are warm-up artifacts, not meta signal.
+      - A hero's run in the top N must last at least `min_streak` consecutive matches to be drawn.
+        Shorter runs are one-match blips that would otherwise litter the chart with stray stubs.
+    """
+    events = match_hero_events(matches)
+    n = len(matches)
+    if n == 0 or events.empty:
+        return pd.DataFrame(columns=["match_seq", "match_id", "hero", "participation_rate", "rank"])
+
+    records = []
+    for seq in range(window - 1, n):
+        start = seq - window + 1
+        wdf = events[(events["match_seq"] >= start) & (events["match_seq"] <= seq)]
+        grp = wdf.groupby(["hero", "status"]).size().unstack(fill_value=0)
+        for status in DRAFT_STATUS_TIERS:
+            if status not in grp.columns:
+                grp[status] = 0
+        grp["participation"] = grp[list(DRAFT_STATUS_TIERS)].sum(axis=1)
+        grp["participation_rate"] = grp["participation"] / window
+        grp = grp.reset_index()
+        grp = grp.sort_values(
+            ["participation_rate", "banned", "first_pick", "picked", "hero"],
+            ascending=[False, False, False, False, True],
+        )
+        grp["rank"] = range(1, len(grp) + 1)
+        top = grp[grp["rank"] <= top_n].copy()
+        top["match_seq"] = seq
+        top["match_id"] = matches[seq]["match_id"]
+        records.append(top[["match_seq", "match_id", "hero", "participation_rate",
+                             "banned", "first_pick", "picked", "rank"]])
+
+    if not records:
+        return pd.DataFrame(columns=["match_seq", "match_id", "hero", "participation_rate", "rank"])
+
+    out = pd.concat(records, ignore_index=True)
+    return _drop_short_runs(out, min_streak)
+
+
+def _drop_short_runs(timeline, min_streak):
+    """Drop each hero's top-N runs that lasted fewer than min_streak matches in a row."""
+    keep = []
+    for hero, hdf in timeline.groupby("hero"):
+        hdf = hdf.sort_values("match_seq")
+        run_id = hdf["match_seq"].diff().ne(1).cumsum()
+        for _, run in hdf.groupby(run_id):
+            if len(run) >= min_streak:
+                keep.append(run)
+    if not keep:
+        return timeline.iloc[0:0]
+    return pd.concat(keep).sort_values(["match_seq", "rank"]).reset_index(drop=True)

@@ -1,0 +1,154 @@
+{
+  "Abrams": {
+    "color": "#2092AE",
+    "icon": "abrams.png"
+  },
+  "Apollo": {
+    "color": "#FF3333",
+    "icon": "apollo.png"
+  },
+  "Bebop": {
+    "color": "#9F4734",
+    "icon": "bebop.png"
+  },
+  "Billy": {
+    "color": "#D4AD0E",
+    "icon": "billy.png"
+  },
+  "Calico": {
+    "color": "#572798",
+    "icon": "calico.png"
+  },
+  "Celeste": {
+    "color": "#BBA9E1",
+    "icon": "celeste.png"
+  },
+  "Doorman": {
+    "color": "#B77528",
+    "icon": "doorman.png"
+  },
+  "Drifter": {
+    "color": "#9D2C2B",
+    "icon": "drifter.png"
+  },
+  "Dynamo": {
+    "color": "#D0B945",
+    "icon": "dynamo.png"
+  },
+  "Graves": {
+    "color": "#D9F334",
+    "icon": "graves.png"
+  },
+  "Grey Talon": {
+    "color": "#5EB083",
+    "icon": "greytalon.png"
+  },
+  "Haze": {
+    "color": "#AC6133",
+    "icon": "haze.png"
+  },
+  "Holliday": {
+    "color": "#A35A1B",
+    "icon": "holliday.png"
+  },
+  "Infernus": {
+    "color": "#C93C26",
+    "icon": "infernus.png"
+  },
+  "Ivy": {
+    "color": "#9D8CA9",
+    "icon": "ivy.png"
+  },
+  "Kelvin": {
+    "color": "#74ABBC",
+    "icon": "kelvin.png"
+  },
+  "Lady Geist": {
+    "color": "#218440",
+    "icon": "ladygeist.png"
+  },
+  "Lash": {
+    "color": "#4174BB",
+    "icon": "lash.png"
+  },
+  "McGinnis": {
+    "color": "#23549D",
+    "icon": "mcginnis.png"
+  },
+  "Mina": {
+    "color": "#A9171E",
+    "icon": "mina.png"
+  },
+  "Mirage": {
+    "color": "#6A2E68",
+    "icon": "mirage.png"
+  },
+  "Mo and Krill": {
+    "color": "#C58428",
+    "icon": "moandkrill.png"
+  },
+  "Paige": {
+    "color": "#258F63",
+    "icon": "paige.png"
+  },
+  "Paradox": {
+    "color": "#983952",
+    "icon": "paradox.png"
+  },
+  "Pocket": {
+    "color": "#858617",
+    "icon": "pocket.png"
+  },
+  "Rem": {
+    "color": "#5383D1",
+    "icon": "rem.png"
+  },
+  "Seven": {
+    "color": "#CC861E",
+    "icon": "seven.png"
+  },
+  "Shiv": {
+    "color": "#E52A68",
+    "icon": "shiv.png"
+  },
+  "Silver": {
+    "color": "#BFBC9F",
+    "icon": "silver.png"
+  },
+  "Sinclair": {
+    "color": "#6B6B6B",
+    "icon": "sinclair.png"
+  },
+  "Venator": {
+    "color": "#BD3599",
+    "icon": "venator.png"
+  },
+  "Victor": {
+    "color": "#658B6F",
+    "icon": "victor.png"
+  },
+  "Vindicta": {
+    "color": "#A2C7E5",
+    "icon": "vindicta.png"
+  },
+  "Viscous": {
+    "color": "#319826",
+    "icon": "viscous.png"
+  },
+  "Vyper": {
+    "color": "#A7AD00",
+    "icon": "vyper.png"
+  },
+  "Warden": {
+    "color": "#4D68A3",
+    "icon": "warden.png"
+  },
+  "Wraith": {
+    "color": "#944D78",
+    "icon": "wraith.png"
+  },
+  "Yamato": {
+    "color": "#625789",
+    "icon": "yamato.png"
+  }
+}

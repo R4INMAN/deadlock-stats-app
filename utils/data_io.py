@@ -1,14 +1,18 @@
+import base64
 import json
 import os
 from datetime import date
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(ROOT_DIR, "data")
+HERO_ICON_DIR = os.path.join(ROOT_DIR, "assets", "heroes")
 
 MATCHES_FILE = os.path.join(DATA_DIR, "matches.json")
 PLAYERS_FILE = os.path.join(DATA_DIR, "players.json")
 HEROES_FILE = os.path.join(DATA_DIR, "heroes.json")
 RANKS_FILE = os.path.join(DATA_DIR, "ranks.json")
 RANK_TIERS_FILE = os.path.join(DATA_DIR, "rank_tiers.json")
+HERO_VISUALS_FILE = os.path.join(DATA_DIR, "hero_visuals.json")
 
 
 def _load(path, default):
@@ -57,6 +61,27 @@ def save_ranks(ranks):
 
 def load_rank_tiers():
     return _load(RANK_TIERS_FILE, [])
+
+
+def load_hero_visuals():
+    """Per-hero official color + minimap icon filename, vendored by fetch_hero_assets.py."""
+    return _load(HERO_VISUALS_FILE, {})
+
+
+def hero_icon_path(icon_name):
+    if not icon_name:
+        return None
+    path = os.path.join(HERO_ICON_DIR, icon_name)
+    return path if os.path.exists(path) else None
+
+
+def hero_icon_data_uri(icon_name):
+    """Icon as a data: URI - Plotly needs the bytes inline to draw it inside the plot area."""
+    path = hero_icon_path(icon_name)
+    if not path:
+        return None
+    with open(path, "rb") as f:
+        return "data:image/png;base64," + base64.b64encode(f.read()).decode()
 
 
 def add_match(match_dict):
