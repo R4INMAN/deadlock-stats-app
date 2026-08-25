@@ -284,3 +284,29 @@ def _drop_short_runs(timeline, min_streak):
     if not keep:
         return timeline.iloc[0:0]
     return pd.concat(keep).sort_values(["match_seq", "rank"]).reset_index(drop=True)
+
+
+def player_stat_over_time(df, player, stat="win_rate", window=10):
+    """Track a player's stat across their games in match order, both cumulative and rolling."""
+    pdf = df[df["player"] == player].copy()
+    if pdf.empty:
+        return pd.DataFrame()
+
+    stat_col_map = {
+        "win_rate": "win",
+        "avg_kp_pct": "kp_pct",
+        "avg_souls_per_min": "souls_per_min",
+        "avg_obj_dmg_per_min": "obj_dmg_per_min",
+        "avg_kills": "kills",
+        "avg_deaths": "deaths",
+        "avg_assists": "assists",
+    }
+    col = stat_col_map.get(stat, stat)
+
+    pdf["match_id_num"] = pdf["match_id"].astype(int)
+    pdf = pdf.sort_values("match_id_num").reset_index(drop=True)
+    pdf["game_number"] = range(1, len(pdf) + 1)
+    pdf["cumulative"] = pdf[col].expanding().mean()
+    pdf["rolling"] = pdf[col].rolling(window=window, min_periods=1).mean()
+
+    return pdf[["game_number", "match_id", col, "cumulative", "rolling"]]
