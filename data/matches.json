@@ -14801,7 +14801,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Venator",
         "win": true,
         "mvp": true,
@@ -15043,7 +15043,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Mirage",
         "win": true,
         "mvp": false,
@@ -15633,7 +15633,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Lady Geist",
         "win": false,
         "mvp": false,
@@ -15773,7 +15773,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Billy",
         "win": true,
         "mvp": false,
@@ -16100,7 +16100,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Venator",
         "win": true,
         "mvp": true,
@@ -16325,7 +16325,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Seven",
         "win": true,
         "mvp": true,
@@ -16465,7 +16465,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Vindicta",
         "win": true,
         "mvp": false,
@@ -16775,7 +16775,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Lady Geist",
         "win": false,
         "mvp": false,
@@ -16983,7 +16983,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Infernus",
         "win": true,
         "mvp": false,
@@ -17157,7 +17157,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Mirage",
         "win": false,
         "mvp": false,
@@ -17433,7 +17433,7 @@
       },
       {
         "team": "Archmother",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Lash",
         "win": true,
         "mvp": false,
@@ -17590,7 +17590,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Apollo",
         "win": false,
         "mvp": false,
@@ -17832,7 +17832,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Pocket",
         "win": false,
         "mvp": false,
@@ -18023,7 +18023,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Lady Geist",
         "win": true,
         "mvp": false,
@@ -18316,7 +18316,7 @@
       },
       {
         "team": "Hidden King",
-        "player": "cleared",
+        "player": "Cleared",
         "hero": "Vyper",
         "win": true,
         "mvp": true,
