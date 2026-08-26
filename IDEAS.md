@@ -12,7 +12,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 - [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `100905275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
-- [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
+- [x] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
       All 82 imported matches have slots 1–12; every match added since loses it. One form
       field to stop the bleed. **S**
 - [ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
