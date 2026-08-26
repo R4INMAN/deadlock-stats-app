@@ -1,8 +1,8 @@
 import streamlit as st
-from utils import data_io, stats
+from utils import data_io, stats, theme, ui
 
-st.set_page_config(page_title="Match Log", page_icon="📋", layout="wide")
-st.title("📋 Match Log")
+st.set_page_config(page_title="Match Log", page_icon="assets/ui/puddle_punch.png", layout="wide")
+ui.page_header("Match Log", "Every logged game, side by side.")
 
 matches = data_io.load_matches()
 if not matches:
@@ -29,7 +29,11 @@ if side_filter != "Any":
 msum = msum[msum["match_id"].isin(filtered_ids)]
 
 st.caption(f"{len(msum)} match(es)")
-st.dataframe(msum, use_container_width=True, hide_index=True)
+st.dataframe(
+    msum[["match_id", "game_length", "win_side", "mvps", "key_players", "num_players"]],
+    use_container_width=True, hide_index=True,
+    column_config=ui.MATCH_SUMMARY_COLUMNS,
+)
 
 st.divider()
 st.subheader("Match detail")
@@ -43,15 +47,30 @@ if match_ids:
     c2.write(f"**Bans:** {', '.join(match.get('bans', [])) or 'none logged'}")
     st.write(f"**First picks:** {', '.join(match.get('first_picks', [])) or 'none logged'}")
 
+    portraits = ui.hero_portrait_uris()
     for side in sorted(set(p["team"] for p in match["players"])):
-        st.markdown(f"**{side}**")
         rows = [p for p in match["players"] if p["team"] == side]
+        st.markdown(ui.side_header(side, won=any(p["win"] for p in rows)),
+                    unsafe_allow_html=True)
         display_rows = []
         for p in rows:
             display_rows.append({
-                "Player": p["player"], "Hero": p["hero"], "Win": p["win"],
-                "MVP": p["mvp"], "Key Player": p["key_player"],
+                "": portraits.get(p["hero"]),
+                "Player": p["player"], "Hero": p["hero"],
+                "MVP": ui.award_icon_uri("mvp") if p["mvp"] else "",
+                "Key Player": ui.award_icon_uri("key_player") if p["key_player"] else "",
                 "K": p["kills"], "D": p["deaths"], "A": p["assists"],
                 "Souls (k)": p["souls_k"], "KP%": p["kp_pct"],
             })
-        st.dataframe(display_rows, use_container_width=True, hide_index=True)
+        # The side header already says who won, so a per-row Win column would repeat it 6 times.
+        st.dataframe(
+            display_rows, use_container_width=True, hide_index=True,
+            column_config={
+                "": st.column_config.ImageColumn("", width="small"),
+                "MVP": st.column_config.ImageColumn("MVP", width="small"),
+                "Key Player": st.column_config.ImageColumn("Key", width="small"),
+                "KP%": st.column_config.NumberColumn("KP%", format="%.1f"),
+            },
+        )
+
+ui.brand_footer()

@@ -1,14 +1,14 @@
 import datetime
 import streamlit as st
-from utils import data_io
+from utils import data_io, ui
 from utils.auth import require_edit_access
 
-st.set_page_config(page_title="Add Match", page_icon="➕", layout="wide")
+st.set_page_config(page_title="Add Match", page_icon="assets/ui/puddle_punch.png", layout="wide")
 
 if not require_edit_access():
     st.stop()
 
-st.title("➕ Match Management")
+ui.page_header("Match Management", "Log a new game, or fix one that went in wrong.")
 
 players_dict = data_io.load_players()
 heroes = data_io.load_heroes()
@@ -202,3 +202,5 @@ with st.form("match_form", clear_on_submit=False):
                 data_io.add_match(new_match)
                 st.success(f"Match {match_id} saved!")
                 st.balloons()
+
+ui.brand_footer()

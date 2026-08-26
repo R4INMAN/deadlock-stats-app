@@ -1,8 +1,8 @@
 import streamlit as st
-from utils import data_io, stats
+from utils import data_io, stats, theme, ui
 
-st.set_page_config(page_title="Player Stats", page_icon="🧑", layout="wide")
-st.title("🧑 Player Stats")
+st.set_page_config(page_title="Player Stats", page_icon="assets/ui/puddle_punch.png", layout="wide")
+ui.page_header("Player Stats", "Who shows up, who wins, and who they show up as.")
 
 matches = data_io.load_matches()
 players = data_io.load_players()
@@ -22,10 +22,25 @@ display["win_rate"] = (display["win_rate"] * 100).round(1)
 display["award_rate"] = (display["award_rate"] * 100).round(1)
 for c in ["avg_kp_pct", "avg_souls_per_min", "avg_obj_dmg_per_min", "avg_kills", "avg_deaths", "avg_assists"]:
     display[c] = display[c].round(2)
+display["hero_portrait"] = ui.hero_portrait_column(display["most_played_hero"])
 st.dataframe(
-    display[["player", "games", "win_rate", "hero_variety", "most_played_hero",
+    display[["hero_portrait", "player", "games", "win_rate", "hero_variety", "most_played_hero",
               "avg_kp_pct", "avg_souls_per_min", "mvp_count", "key_player_count", "award_rate"]],
     use_container_width=True, hide_index=True,
+    column_config={
+        "hero_portrait": st.column_config.ImageColumn("", width="small",
+                                                       help="Most played hero"),
+        "player": st.column_config.TextColumn("Player"),
+        "games": st.column_config.NumberColumn("Games"),
+        "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
+        "hero_variety": st.column_config.NumberColumn("Heroes"),
+        "most_played_hero": st.column_config.TextColumn("Most played"),
+        "avg_kp_pct": st.column_config.NumberColumn("Avg KP%", format="%.1f"),
+        "avg_souls_per_min": st.column_config.NumberColumn("Souls/min", format="%.1f"),
+        "mvp_count": st.column_config.NumberColumn("MVP"),
+        "key_player_count": st.column_config.NumberColumn("Key player"),
+        "award_rate": st.column_config.NumberColumn("Award rate", format="%.1f%%"),
+    },
 )
 
 st.divider()
@@ -40,6 +55,16 @@ notes = players.get(chosen, {}).get("notes", "")
 if detail is None:
     st.info(f"{chosen} has no logged games yet.")
 else:
+    # Lead with the player's signature hero, so the detail view opens on a face rather than
+    # on a row of numbers.
+    signature = detail["hero_breakdown"].iloc[0]
+    st.markdown(
+        ui.hero_chip(signature["hero"], size=44,
+                     label=f"<b>{chosen}</b> &middot; mostly {signature['hero']} "
+                           f"({int(signature['games'])} game{'s' if signature['games'] != 1 else ''})"),
+        unsafe_allow_html=True,
+    )
+
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Games", detail["games"])
     c2.metric("Win rate", f"{detail['win_rate']*100:.1f}%")
@@ -48,8 +73,10 @@ else:
     c5.metric("Key Player awards", detail["key_player_count"])
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Avg Souls/min", f"{detail['avg_souls_per_min']:.1f}" if detail['avg_souls_per_min'] else "n/a")
-    c2.metric("Avg Obj Dmg/min", f"{detail['avg_obj_dmg_per_min']:.1f}" if detail['avg_obj_dmg_per_min'] else "n/a")
+    c1.metric("Avg Souls/min",
+              f"{detail['avg_souls_per_min']:.1f}" if detail['avg_souls_per_min'] else "n/a")
+    c2.metric("Avg Obj Dmg/min",
+              f"{detail['avg_obj_dmg_per_min']:.1f}" if detail['avg_obj_dmg_per_min'] else "n/a")
     c3.metric("Hero variety", detail["hero_variety"])
 
     if rank:
@@ -60,10 +87,35 @@ else:
     st.markdown("**Win rate by side**")
     side_display = detail["side_breakdown"].copy()
     side_display["win_rate"] = (side_display["win_rate"] * 100).round(1)
-    st.dataframe(side_display, use_container_width=True, hide_index=True)
+    st.dataframe(
+        side_display, use_container_width=True, hide_index=True,
+        column_config={
+            "team": st.column_config.TextColumn("Side"),
+            "games": st.column_config.NumberColumn("Games"),
+            "wins": st.column_config.NumberColumn("Wins"),
+            "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
+        },
+    )
 
     st.markdown("**Heroes played**")
     hero_display = detail["hero_breakdown"].copy()
     hero_display["win_rate"] = (hero_display["win_rate"] * 100).round(1)
     hero_display["avg_kp_pct"] = hero_display["avg_kp_pct"].round(1)
-    st.dataframe(hero_display, use_container_width=True, hide_index=True)
+    hero_display["portrait"] = ui.hero_portrait_column(hero_display["hero"])
+    st.dataframe(
+        hero_display[["portrait", "hero", "games", "wins", "win_rate", "avg_kp_pct",
+                       "mvp_count", "key_player_count"]],
+        use_container_width=True, hide_index=True,
+        column_config={
+            "portrait": st.column_config.ImageColumn("", width="small"),
+            "hero": st.column_config.TextColumn("Hero"),
+            "games": st.column_config.NumberColumn("Games"),
+            "wins": st.column_config.NumberColumn("Wins"),
+            "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
+            "avg_kp_pct": st.column_config.NumberColumn("Avg KP%", format="%.1f"),
+            "mvp_count": st.column_config.NumberColumn("MVP"),
+            "key_player_count": st.column_config.NumberColumn("Key player"),
+        },
+    )
+
+ui.brand_footer()

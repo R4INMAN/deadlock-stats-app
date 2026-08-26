@@ -1,0 +1,20 @@
+{
+  "base_border": "#444444",
+  "base_text": "#FFEFD7",
+  "brand_green": "#5FE69E",
+  "color_common_dark_gray": "#2E2C27",
+  "color_common_darkest_gray": "#1A1A1A",
+  "color_gold": "#FFED79",
+  "debuff_color": "#D74949",
+  "off_black": "#10130D",
+  "soul_color": "#70F8C1",
+  "spirit_color": "#8A55B3",
+  "team1_color": "#D4860B",
+  "team1_color_bright": "#FBDCA0",
+  "team2_color": "#4D75C3",
+  "team2_color_bright": "#BDCBFF",
+  "tech_color": "#00DDFF",
+  "viscous_color": "#319826",
+  "warning_red": "#EE5945",
+  "weapon_color": "#E58A00"
+}
