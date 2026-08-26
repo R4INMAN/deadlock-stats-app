@@ -27,8 +27,27 @@ def _save(path, data):
         json.dump(data, f, indent=2)
 
 
+def match_sort_key(match_id):
+    """Numeric ordering for Deadlock match IDs.
+
+    The game assigns these sequentially, so numeric order is chronological order. They're
+    stored as strings, and sorting them as strings breaks the moment an ID gains a digit:
+    '1009058275' sorts below '99935534' lexically, burying the newest match at the bottom
+    of every "recent" list. Non-numeric IDs sort last rather than raising.
+    """
+    s = str(match_id)
+    return (0, int(s)) if s.isdigit() else (1, 0)
+
+
 def load_matches():
-    return _load(MATCHES_FILE, [])
+    """Matches in chronological order (ascending match ID).
+
+    Sorting here rather than at each call site means everything downstream that treats list
+    position as time - the rolling draft-participation timeline especially - gets a real
+    chronological axis for free.
+    """
+    matches = _load(MATCHES_FILE, [])
+    return sorted(matches, key=lambda m: match_sort_key(m.get("match_id")))
 
 
 def save_matches(matches):

@@ -14,3 +14,6 @@ streamlit run Home.py
 - `convert_csv.py` — the one-time import script that built data/*.json from your old Google Sheet CSVs (kept for reference, not needed to run the app)
 
 Your 82 historical matches, 83 players, and 38 heroes are already imported.
+
+## Ideas / backlog
+See [IDEAS.md](IDEAS.md) for the running shortlist of improvements, grouped by effort.

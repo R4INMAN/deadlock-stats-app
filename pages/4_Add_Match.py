@@ -24,7 +24,7 @@ if mode == "Delete Match":
     if not matches:
         st.info("No matches to delete.")
         st.stop()
-    match_ids = sorted((m["match_id"] for m in matches), reverse=True)
+    match_ids = [m["match_id"] for m in matches][::-1]  # chronological from load_matches()
     chosen_id = st.selectbox("Select match to delete", match_ids)
     match = next(m for m in matches if m["match_id"] == chosen_id)
     st.write(f"**Length:** {match.get('game_length', 'n/a')}")
@@ -48,7 +48,7 @@ if editing:
     if not matches:
         st.info("No matches to edit.")
         st.stop()
-    match_ids = sorted((m["match_id"] for m in matches), reverse=True)
+    match_ids = [m["match_id"] for m in matches][::-1]  # chronological from load_matches()
     edit_id = st.selectbox("Select match to edit", match_ids)
     existing_match = next(m for m in matches if m["match_id"] == edit_id)
 
