@@ -118,6 +118,10 @@ with st.form("match_form", clear_on_submit=False):
                 h = st.selectbox("Hero", heroes,
                                   index=idx_of(heroes, existing["hero"] if existing else None),
                                   key=f"{team}_hero_{i}")
+                default_slot = (existing["draft_slot"] if existing and existing.get("draft_slot") else
+                                (i + 1 if team == TEAM_A else i + 7))
+                slot = st.number_input("Draft Slot", min_value=1, max_value=12, step=1,
+                                        value=default_slot, key=f"{team}_slot_{i}")
                 k = st.number_input("Kills", min_value=0, step=1,
                                      value=existing["kills"] if existing else 0, key=f"{team}_k_{i}")
                 d = st.number_input("Deaths", min_value=0, step=1,
@@ -138,7 +142,7 @@ with st.form("match_form", clear_on_submit=False):
                                         key=f"{team}_heal_{i}")
                 all_rows.append({"team": team, "player": p, "hero": h, "kills": k, "deaths": d,
                                   "assists": a, "souls_k": souls, "plr_damage_k": plr,
-                                  "obj_damage_k": obj, "healing_k": heal})
+                                  "obj_damage_k": obj, "healing_k": heal, "draft_slot": slot})
 
     st.divider()
     c1, c2 = st.columns(2)
@@ -199,7 +203,7 @@ with st.form("match_form", clear_on_submit=False):
                     "kills": r["kills"], "deaths": r["deaths"], "assists": r["assists"],
                     "souls_k": r["souls_k"], "plr_damage_k": r["plr_damage_k"],
                     "obj_damage_k": r["obj_damage_k"], "healing_k": r["healing_k"],
-                    "draft_slot": None,
+                    "draft_slot": r["draft_slot"],
                 })
             new_match = {
                 "match_id": match_id,
