@@ -35,26 +35,29 @@ spread_test, cohesion = run_tests(len(matches), min_games)
 
 st.subheader("Is it real?")
 if cohesion and spread_test:
+    lo, hi = chemistry.wilson_interval(cohesion["cohesive_side_wins"], cohesion["n_matches"])
     verdict_cols = st.columns(2)
     with verdict_cols[0]:
-        st.markdown("**Test 1 — do high-history teams win more?**")
+        st.markdown("**Do high-history teams win more?**")
         st.metric(
             "More-cohesive side wins",
             f"{cohesion['cohesive_side_win_rate']:.1%}",
-            f"{cohesion['cohesive_side_wins']} of {cohesion['n_matches']} matches",
+            f"{cohesion['cohesive_side_wins']} of {cohesion['n_matches']} · 95% CI {lo:.0%}–{hi:.0%}",
+            delta_color="off",
         )
         st.caption(
-            f"p = {cohesion['p_value']:.2f}. Each match scores both sides by how many games "
-            "its pairs had already played together, then asks whether the more-practised side won."
+            "Each match scores both sides by how many games their pairs had already played "
+            "together, then asks whether the more-practised side won."
         )
     with verdict_cols[1]:
-        st.markdown("**Test 2 — do pair win rates spread out more than chance?**")
+        st.markdown("**Do pair win rates spread more than chance?**")
         z = ((spread_test["observed"] - spread_test["null_mean"]) / spread_test["null_sd"]
              if spread_test["null_sd"] else 0.0)
-        st.metric("Spread vs. coin flips", f"{z:+.1f} SD", f"p = {spread_test['p_value']:.2f}")
+        st.metric("Spread vs. coin flips", f"{z:+.1f} SD", f"p = {spread_test['p_value']:.2f}",
+                  delta_color="off")
         st.caption(
             f"Observed {spread_test['observed']:.1f} against a chance-only average of "
-            f"{spread_test['null_mean']:.1f}, from {spread_test['n_boot']} simulated seasons."
+            f"{spread_test['null_mean']:.1f}, over {spread_test['n_boot']} simulated seasons."
         )
 
     real = cohesion["p_value"] < 0.05 or spread_test["p_value"] < 0.05
@@ -63,11 +66,15 @@ if cohesion and spread_test:
     else:
         power_65 = chemistry.detection_power(cohesion["n_matches"], 0.65)
         power_60 = chemistry.detection_power(cohesion["n_matches"], 0.60)
-        st.warning(
-            f"**No detectable friendship buff yet.** Neither test separates these results from "
-            f"coin flips. That is not proof it doesn't exist — with {cohesion['n_matches']} matches "
-            f"there is a {power_65:.0%} chance of catching a large effect (a 65/35 edge) but only "
-            f"{power_60:.0%} for a moderate one (60/40). A subtle buff would still be invisible here."
+        st.info(
+            f"**No detectable friendship buff — and no evidence against one either.** The headline "
+            f"{cohesion['cohesive_side_win_rate']:.1%} sits below 50%, but its interval "
+            f"({lo:.0%}–{hi:.0%}) straddles a coin flip, so this is *we can't tell*, not "
+            f"*stacking friends loses*." + chr(10) * 2 +
+            f"The honest limit is sample size. At {cohesion['n_matches']} matches these tests catch "
+            f"a large effect (65/35) about {power_65:.0%} of the time, but a moderate one (60/40) "
+            f"only {power_60:.0%}. A real-but-subtle buff would still be invisible here — worth "
+            f"rerunning near 200 matches."
         )
 
 st.divider()

@@ -64,10 +64,11 @@ rather than simplification.
       as error bars / a caterpillar plot instead of point estimates. The single best cure for
       "why is my win rate bouncing around." Also the most useful dataviz exercise on this
       list. **M**
-- [ ] **Elo or TrueSkill over match order.** Per-player rating updated match by match, with
-      a rating-history chart. Fixed 6v6 in-house games with shuffled rosters is close to the
-      ideal setting for this, and it handles opponent strength in a way raw win rate cannot.
-      Also gives a defensible auto-balance signal for team-making. **M–L**
+- [~] **~~Elo or TrueSkill over match order.~~** *Declined — we don't want to build our own
+      rating system.* The data backs the call anyway: a penalized logistic fit over player
+      identity had its cross-validated likelihood maximized by shrinking every rating to
+      zero, never beating "always predict 50%". 82 outcomes against 80 players carries no
+      identifiable individual signal.
 - [ ] **Hero strength vs. player skill.** Hero win rates are confounded — good players pick
       certain heroes. A mixed-effects logistic model (random effect per player, fixed effect
       per hero) separates the two and answers "is Wraith strong, or is Sulley strong?" **L**
@@ -140,8 +141,8 @@ friendship buff, not a subtle one. Revisit at ~200 matches.
 Related: **individual player skill is also not identifiable at this sample size.** An
 L2-penalized logistic model over player identity had its cross-validated log-likelihood
 minimized by shrinking every rating to zero — it never beat "always predict 50%". With 82
-binary outcomes and 80 players there simply isn't enough signal, which is why Elo/TrueSkill
-(Tier 3) should wait for more matches rather than be built now.
+binary outcomes and 80 players there simply isn't enough signal — which is a second reason,
+beyond not wanting to maintain one, that a homegrown Elo isn't worth building.
 
 ## Notes
 
