@@ -9,7 +9,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 0 — Bugs and papercuts
 
-- [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `1009058275` is our newest match, but string-sorting
+- [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `100905275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
 - [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
@@ -103,11 +103,12 @@ flags. It also carries `start_time`, so the date backfill is real.
       What worked: match IDs are sequential in time, so the public Parquet snapshot's 326M
       (match_id, start_time) rows bracket each missing match within seconds. Holdout on the 47
       known: median error 1s, 47/47 correct dates. **S–M**
-- [ ] **`match_id` 1009058275 cannot exist — likely a typo for `100905275`.** The largest real
-      match ID as of 2026-08-26 is 101,820,190; ours is ten times that. `100905275` is a
-      PrivateLobby of exactly 23:39 (our recorded length) whose 12 players are *all* known
-      regulars, against 0 overlap for the nearest coincidental match. Its date is filled in
-      already; the ID itself is left as recorded pending a decision. **S**
+- [x] **`match_id` 1009058275 could not exist — corrected to `100905275`.** *(done)* The
+      largest real match ID on 2026-08-26 was 101,820,190; ours was ten times that, a stray `8`
+      typed after `100905`. `100905275` is a PrivateLobby of exactly 23:39 (our recorded game
+      length) whose 12 players are *all* known regulars, against 0 overlap for the nearest
+      coincidental match. Worth knowing the class exists: a mistyped ID is invisible until
+      something tries to look the match up. **S**
 
 - [ ] **Replace the 12-player form with "paste a match ID."** K/D/A, souls, heroes, teams,
       win, duration, and MVP all arrive from the API. This is the single biggest
