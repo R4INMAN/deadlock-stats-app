@@ -40,10 +40,17 @@ wins = int(pdf["win"].sum())
 games = len(pdf)
 losses = games - wins
 
-# Best teammate, by the same 5-game floor the Chemistry page uses. Shown with its record so
-# the number is never presented as more solid than it is.
+# Best teammate, by the same 5-game floor the Chemistry page uses - and by synergy, so the slot
+# goes to whoever this player wins more with than without rather than to whoever is best. Shown
+# with its record so the number is never presented as more solid than it is.
 mates = chemistry.player_pair_records(matches, chosen, min_games=5)
 best_mate = mates[0] if mates else None
+
+# Kryptonite: the same arithmetic across the net, sorted worst first. Baselined for the same
+# reason - otherwise the slot goes to the best player in the pool, who beats everyone, rather
+# than to the one who beats THIS player by more than their record says they should.
+foes = chemistry.player_opponent_records(matches, chosen, min_games=5)
+nemesis = foes[0] if foes else None
 
 st.markdown(
     f"""
@@ -71,13 +78,32 @@ c3.metric("MVPs", detail["mvp_count"])
 c4.metric("Key player", detail["key_player_count"])
 c5.metric("Heroes played", detail["hero_variety"])
 
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 c1.metric("Avg KP%", f"{detail['avg_kp_pct']:.1f}")
 c2.metric("Souls/min", f"{detail['avg_souls_per_min']:.1f}" if detail["avg_souls_per_min"] else "n/a")
 c3.metric(
     "Best teammate",
     best_mate["teammate"] if best_mate else "—",
-    f"{best_mate['wins']}–{best_mate['losses']} together" if best_mate else None,
+    (f"{best_mate['wins']}–{best_mate['losses']} together · "
+     f"{best_mate['synergy'] * 100:+.0f}pp vs. baseline") if best_mate else None,
+    delta_color="off",
+)
+c4.metric(
+    "Kryptonite",
+    nemesis["opponent"] if nemesis else "—",
+    (f"{nemesis['wins']}–{nemesis['losses']} against · "
+     f"{nemesis['edge'] * 100:+.0f}pp vs. baseline") if nemesis else None,
+    delta_color="off",
+    # The tooltip carries the caveat so the card itself stays screenshot-clean. It quotes the
+    # real p-value rather than a fixed disclaimer, so a matchup that ever does mean something
+    # gets to say so.
+    help=(
+        f"The opponent who beats {chosen} by the most over what the baseline expected of "
+        f"those matchups - 5+ games on opposite sides, same method as Best teammate, across "
+        f"the net. p = {nemesis['p_value']:.2f}: "
+        + ("unlikely to be luck alone." if nemesis["p_value"] < 0.05
+           else "luck alone explains this comfortably, so it is a talking point, not a read.")
+    ) if nemesis else f"{chosen} has faced no one 5+ times yet.",
 )
 
 # A player's win rate is a small sample too - 39 games still spans roughly +/-15 points.
