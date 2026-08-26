@@ -40,8 +40,9 @@ wins = int(pdf["win"].sum())
 games = len(pdf)
 losses = games - wins
 
-# Best teammate, by the same 5-game floor the Chemistry page uses. Shown with its record so
-# the number is never presented as more solid than it is.
+# Best teammate, by the same 5-game floor the Chemistry page uses - and by synergy, so the slot
+# goes to whoever this player wins more with than without rather than to whoever is best. Shown
+# with its record so the number is never presented as more solid than it is.
 mates = chemistry.player_pair_records(matches, chosen, min_games=5)
 best_mate = mates[0] if mates else None
 
@@ -77,7 +78,9 @@ c2.metric("Souls/min", f"{detail['avg_souls_per_min']:.1f}" if detail["avg_souls
 c3.metric(
     "Best teammate",
     best_mate["teammate"] if best_mate else "—",
-    f"{best_mate['wins']}–{best_mate['losses']} together" if best_mate else None,
+    (f"{best_mate['wins']}–{best_mate['losses']} together · "
+     f"{best_mate['synergy'] * 100:+.0f}pp vs. baseline") if best_mate else None,
+    delta_color="off",
 )
 
 # A player's win rate is a small sample too - 39 games still spans roughly +/-15 points.

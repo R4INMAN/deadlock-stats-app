@@ -140,14 +140,18 @@ Available per match, none of it in `matches.json` today:
 
 ## Findings so far
 
-**The friendship buff is not detectable in 82 matches.** Two independent tests, both null:
+**The friendship buff is not detectable in 82 matches.** Every pair is now scored against a
+baseline refitted without that pair's own games, so "synergy" means win rate above what the two
+players manage apart. Three tests, all null:
 
 - *Cohesion test* — the side whose players had more prior games together won **36 of 81**
-  (44.4%, p = 0.37). If anything the sign points the wrong way, though not significantly.
+  (44.4%) against a 50.6% baseline, p = 0.32. If anything the sign points the wrong way, though
+  not significantly.
 - *Spread test* — the variation across teammate-pair win rates came in **1.7 SD below** what
-  pure coin flips produce (p = 0.96). Pairs are more uniform than chance, not less.
-- Only **3 of 135** qualifying pairs clear a 95% significance bar, where chance alone predicts
-  about 7.
+  seasons simulated at each match's baseline odds produce (p = 0.98). Pairs are more uniform
+  than chance, not less.
+- Only **2 of 135** qualifying pairs clear p < 0.05 against the fitted baseline (7 of 135 against
+  the credulous face-value one), where chance alone predicts about 7 either way.
 
 Power is the caveat that keeps this honest: at 81 matches there's a 78% chance of catching a
 large effect (a 65/35 edge) but only 44% for a moderate one. A null here rules out a *big*
@@ -157,7 +161,20 @@ Related: **individual player skill is also not identifiable at this sample size.
 L2-penalized logistic model over player identity had its cross-validated log-likelihood
 minimized by shrinking every rating to zero — it never beat "always predict 50%". With 82
 binary outcomes and 80 players there simply isn't enough signal — which is a second reason,
-beyond not wanting to maintain one, that a homegrown Elo isn't worth building.
+beyond not wanting to maintain one, that a homegrown Elo isn't worth building. The marginal
+likelihood agrees: over a grid of prior precisions it rises monotonically toward maximum
+shrinkage, so the fitted baseline on the Chemistry page sits within a point or two of a coin
+flip for everyone.
+
+Stronger still, **win rates point slightly the wrong way.** Scoring each match from win rates
+that exclude it, the logistic slope on the two sides' summed rating gap is **−0.60** where 1.0
+would mean records predict exactly as advertised (p ≈ 0.06 against coin-flip seasons run through
+the same leave-one-out pipeline, which land at −0.06, not 0). Consistent with balanced drafting
+plus mean reversion: whoever is hot gets a worse team next week. It also means the usual
+objection to the leaderboard — "that pair only looks good because one of them wins a lot" — has
+no statistical footing here. What the pair leaderboard actually reflects is 5-game samples: the
+top pair, Kobbert + Maeko, is 5–0 together, and Maeko's headline 66.7% win rate *is* those five
+games — 42.9% apart from Kobbert.
 
 ## Notes
 
