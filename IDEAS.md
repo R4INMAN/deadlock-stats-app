@@ -9,7 +9,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 0 — Bugs and papercuts
 
-- [ ] **Match IDs sort as strings.** `1009058275` is our newest match, but string-sorting
+- [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `1009058275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
 - [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/4_Add_Match.py:190`).
@@ -35,7 +35,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 2 — Fun, social, and bragging rights
 
-- [ ] **Player card.** One screenshot-able block per person: portrait of their top hero,
+- [x] **Player card.** *(done — `pages/8_Player_Cards.py`)* One screenshot-able block per person: portrait of their top hero,
       W/L, rank badge, signature hero, MVP count, one weird stat. Built for pasting into
       Discord. **M**
 - [ ] **Awards / superlatives page.** Auto-computed, deliberately unserious: Farm King
@@ -44,7 +44,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
       each session so they rotate. **M**
 - [ ] **Streaks and records.** Longest win/loss streak, best single-game KDA, biggest souls
       lead, fastest and longest games. Cheap to compute, disproportionately fun. **S–M**
-- [ ] **Head-to-head.** Pick two players: record when on the same team vs. opposite sides.
+- [x] **Head-to-head.** *(done — `pages/9_Head_to_Head.py`)* Pick two players: record when on the same team vs. opposite sides.
       Settles arguments; generates new ones. **M**
 - [ ] **"Since last week" digest.** After the API date backfill (Tier 4), a Home block
       showing what moved: biggest win-rate swing, new hero picks, streaks broken. Gives
@@ -71,7 +71,7 @@ rather than simplification.
 - [ ] **Hero strength vs. player skill.** Hero win rates are confounded — good players pick
       certain heroes. A mixed-effects logistic model (random effect per player, fixed effect
       per hero) separates the two and answers "is Wraith strong, or is Sulley strong?" **L**
-- [ ] **Synergy and counter matrices.** Pairwise win rate for teammate pairs and opposing
+- [x] **Synergy and counter matrices.** *(done for players — `pages/10_Chemistry.py`; hero-pair synergy still open)* Pairwise win rate for teammate pairs and opposing
       pairs, against the baseline predicted by each hero's solo rate. Needs shrinkage badly
       at 82 matches — most cells will have 1–3 games — so present it with a sample-size gate
       and an explicit "not enough data" state. **M–L**
@@ -121,6 +121,27 @@ Available per match, none of it in `matches.json` today:
   impressive thing on this list)
 
 ---
+
+## Findings so far
+
+**The friendship buff is not detectable in 82 matches.** Two independent tests, both null:
+
+- *Cohesion test* — the side whose players had more prior games together won **36 of 81**
+  (44.4%, p = 0.37). If anything the sign points the wrong way, though not significantly.
+- *Spread test* — the variation across teammate-pair win rates came in **1.7 SD below** what
+  pure coin flips produce (p = 0.96). Pairs are more uniform than chance, not less.
+- Only **3 of 135** qualifying pairs clear a 95% significance bar, where chance alone predicts
+  about 7.
+
+Power is the caveat that keeps this honest: at 81 matches there's a 78% chance of catching a
+large effect (a 65/35 edge) but only 44% for a moderate one. A null here rules out a *big*
+friendship buff, not a subtle one. Revisit at ~200 matches.
+
+Related: **individual player skill is also not identifiable at this sample size.** An
+L2-penalized logistic model over player identity had its cross-validated log-likelihood
+minimized by shrinking every rating to zero — it never beat "always predict 50%". With 82
+binary outcomes and 80 players there simply isn't enough signal, which is why Elo/TrueSkill
+(Tier 3) should wait for more matches rather than be built now.
 
 ## Notes
 

@@ -10,7 +10,9 @@ if not matches:
     st.stop()
 
 df = stats.matches_to_rows_df(matches)
-msum = stats.matches_summary_df(matches).sort_values("match_id", ascending=False)
+# Chronological from load_matches(); reverse for newest-first. A sort_values("match_id")
+# here would compare the IDs as strings and put 10-digit IDs below 8-digit ones.
+msum = stats.matches_summary_df(matches).iloc[::-1]
 
 with st.expander("Filters", expanded=False):
     c1, c2, c3 = st.columns(3)
