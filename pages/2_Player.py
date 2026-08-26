@@ -1,4 +1,5 @@
 import streamlit as st
+import altair as alt
 from utils import data_io, stats, theme, ui
 
 st.set_page_config(page_title="Player Stats", page_icon="assets/ui/puddle_punch.png", layout="wide")
@@ -117,5 +118,57 @@ else:
             "key_player_count": st.column_config.NumberColumn("Key player"),
         },
     )
+
+    st.markdown("**Trend over time**")
+    stat_options = {
+        "Win rate": "win_rate",
+        "Avg KP%": "avg_kp_pct",
+        "Avg Souls/min": "avg_souls_per_min",
+        "Avg Obj Dmg/min": "avg_obj_dmg_per_min",
+        "Avg Kills": "avg_kills",
+        "Avg Deaths": "avg_deaths",
+        "Avg Assists": "avg_assists",
+    }
+    c1, c2 = st.columns([2, 1])
+    stat_label = c1.selectbox("Stat", list(stat_options.keys()))
+    window = c2.number_input("Rolling window (games)", min_value=2, max_value=50, value=10)
+
+    trend = stats.player_stat_over_time(df, chosen, stat=stat_options[stat_label], window=window)
+    if trend.empty:
+        st.info("Not enough data to chart yet.")
+    else:
+        long_df = trend.melt(
+            id_vars=["game_number"],
+            value_vars=["cumulative", "rolling"],
+            var_name="series", value_name="value",
+        )
+        long_df["series"] = long_df["series"].map({
+            "cumulative": "Cumulative average",
+            "rolling": f"Rolling avg (last {window})",
+        })
+
+        # Rolling is the series you actually read, so it gets the brighter of the two side
+        # colors; the cumulative baseline sits behind it in the same hue.
+        cumulative_label = "Cumulative average"
+        rolling_label = f"Rolling avg (last {window})"
+
+        chart = alt.Chart(long_df).mark_bar().encode(
+            x=alt.X("game_number:O", title="Game #"),
+            xOffset="series:N",
+            y=alt.Y("value:Q", title=stat_label),
+            color=alt.Color("series:N", title="", scale=alt.Scale(
+                domain=[cumulative_label, rolling_label],
+                range=[theme.color("team2_color"), theme.color("team2_color_bright")],
+            )),
+            tooltip=["game_number", "series", alt.Tooltip("value:Q", format=".2f")],
+        ).properties(height=400).configure_view(fill=None, stroke=None).configure(
+            background="rgba(0,0,0,0)"
+        ).configure_axis(
+            labelColor=theme.color("base_text"), titleColor=theme.color("base_text"),
+        ).configure_legend(
+            labelColor=theme.color("base_text"), titleColor=theme.color("base_text"),
+        )
+
+        st.altair_chart(chart, use_container_width=True)
 
 ui.brand_footer()

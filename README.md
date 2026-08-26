@@ -42,3 +42,6 @@ scene, and flat on a dark page 7 of the 38 fall below a 3:1 contrast ratio, wher
 wants 4.5:1. `utils/theme.py` lifts lightness until a color clears an actual contrast target,
 keeping the hue so heroes stay tellable apart. Get hero colors from `theme.hero_color` /
 `theme.hero_text_color` rather than reading `hero_visuals.json` directly.
+
+## Ideas / backlog
+See [IDEAS.md](IDEAS.md) for the running shortlist of improvements, grouped by effort.

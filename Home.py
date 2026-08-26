@@ -34,7 +34,9 @@ if not df.empty:
         ui.side_bar(row["team"], row["win_rate"], int(row["wins"]), int(row["games"]))
 
     st.subheader("Recent matches")
-    msum = stats.matches_summary_df(matches).sort_values("match_id", ascending=False).head(10)
+    # load_matches() hands back chronological order, so newest-first is just a reversal.
+    # Sorting on match_id here would order the IDs as strings and bury the newest match.
+    msum = stats.matches_summary_df(matches).iloc[::-1].head(10)
     st.dataframe(
         msum[["match_id", "game_length", "win_side", "mvps", "key_players", "num_players"]],
         use_container_width=True, hide_index=True,
@@ -51,5 +53,8 @@ st.page_link("pages/4_Add_Match.py", label="Add a match")
 st.page_link("pages/5_Add_Player_Hero.py", label="Add player / hero")
 st.page_link("pages/6_Player_Ranks.py", label="Log player rank")
 st.page_link("pages/7_Leaderboard.py", label="Leaderboard")
+st.page_link("pages/8_Player_Cards.py", label="Player cards")
+st.page_link("pages/9_Head_to_Head.py", label="Head to head")
+st.page_link("pages/10_Chemistry.py", label="Friendship buff")
 
 ui.brand_footer()
