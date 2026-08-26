@@ -30,7 +30,9 @@ st.dataframe(
     display[["portrait", "hero", "games", "win_rate", "draft_participation_rate", "pick_rate",
               "ban_rate", "first_pick_rate", "mvp_count", "key_player_count", "top_player",
               "top_player_games"]]
-    .sort_values("draft_participation_rate", ascending=False),
+    # Games, not draft participation: participation counts bans, so a hero the group keeps
+    # banning but has barely played was topping a table meant to show who actually gets played.
+    .sort_values(["games", "draft_participation_rate"], ascending=[False, False]),
     use_container_width=True, hide_index=True,
     column_config={
         "portrait": st.column_config.ImageColumn("", width="small"),

@@ -12,7 +12,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 - [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `1009058275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
-- [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/4_Add_Match.py:190`).
+- [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
       All 82 imported matches have slots 1–12; every match added since loses it. One form
       field to stop the bleed. **S**
 - [ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
@@ -35,7 +35,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 2 — Fun, social, and bragging rights
 
-- [x] **Player card.** *(done — `pages/8_Player_Cards.py`)* One screenshot-able block per person: portrait of their top hero,
+- [x] **Player card.** *(done — `pages/5_Player_Cards.py`)* One screenshot-able block per person: portrait of their top hero,
       W/L, rank badge, signature hero, MVP count, one weird stat. Built for pasting into
       Discord. **M**
 - [ ] **Awards / superlatives page.** Auto-computed, deliberately unserious: Farm King
@@ -44,7 +44,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
       each session so they rotate. **M**
 - [ ] **Streaks and records.** Longest win/loss streak, best single-game KDA, biggest souls
       lead, fastest and longest games. Cheap to compute, disproportionately fun. **S–M**
-- [x] **Head-to-head.** *(done — `pages/9_Head_to_Head.py`)* Pick two players: record when on the same team vs. opposite sides.
+- [x] **Head-to-head.** *(done — `pages/6_Head_to_Head.py`)* Pick two players: record when on the same team vs. opposite sides.
       Settles arguments; generates new ones. **M**
 - [ ] **"Since last week" digest.** After the API date backfill (Tier 4), a Home block
       showing what moved: biggest win-rate swing, new hero picks, streaks broken. Gives
@@ -72,7 +72,7 @@ rather than simplification.
 - [ ] **Hero strength vs. player skill.** Hero win rates are confounded — good players pick
       certain heroes. A mixed-effects logistic model (random effect per player, fixed effect
       per hero) separates the two and answers "is Wraith strong, or is Sulley strong?" **L**
-- [x] **Synergy and counter matrices.** *(done for players — `pages/10_Chemistry.py`; hero-pair synergy still open)* Pairwise win rate for teammate pairs and opposing
+- [x] **Synergy and counter matrices.** *(done for players — `pages/7_Chemistry.py`; hero-pair synergy still open)* Pairwise win rate for teammate pairs and opposing
       pairs, against the baseline predicted by each hero's solo rate. Needs shrinkage badly
       at 82 matches — most cells will have 1–3 games — so present it with a sample-size gate
       and an explicit "not enough data" state. **M–L**
@@ -87,14 +87,24 @@ rather than simplification.
 
 **Verified working 2026-08-25** against match `99935534`:
 `https://api.deadlock-api.com/v1/matches/{match_id}/metadata` — no auth, HTTP 200.
+**Send a User-Agent.** Python's default `Python-urllib/3.x` is refused with a 403; any
+real UA gets 200. Easy to misread as the API having died.
 
 The API reproduced our hand-entered row **exactly**: every K/D/A, `net_worth` 45.1k vs. our
 typed 45.0, `duration_s` 1895 → 31:35, and `mvp_rank` 1/2/3 matching our MVP and Key Player
 flags. It also carries `start_time`, so the date backfill is real.
 
-- [ ] **Backfill match dates.** `start_time` (unix) for all 82 matches. Unblocks every
-      calendar-based feature — season splits, "this month," real time-axis charts instead of
-      match-order proxies. **S–M**
+- [~] **Backfill match dates.** *(47 of 82 done — `backfill_match_dates.py`)* `start_time`
+      converted to US Eastern before the date is read, since sessions run past midnight UTC
+      and a UTC date lands a Sunday PUG on Monday. `utils/dates.py` is the single definition.
+      The remaining 35 are the blocker worth understanding: they are custom lobbies that never
+      entered the API's ClickHouse DB, so they only exist in Steam's archive, and the Steam
+      fallback is capped at **3 requests/hour per IP** — failed attempts included. Two dead
+      ends already checked: the bulk `/v1/matches/metadata` endpoint 404s on all of them, and
+      unioning `match-history` across all 78 known account_ids covered **0** of the 35. An API
+      key (300/hour) finishes it in one run; without one it is ~12h of trickling, and the three
+      Steam fetches attempted so far all returned 503. Unblocks every calendar-based feature —
+      season splits, "this month," real time-axis charts instead of match-order proxies. **S–M**
 - [ ] **Replace the 12-player form with "paste a match ID."** K/D/A, souls, heroes, teams,
       win, duration, and MVP all arrive from the API. This is the single biggest
       quality-of-life change available. **M–L**

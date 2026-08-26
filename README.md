@@ -12,7 +12,10 @@ streamlit run Home.py
 - `data/*.json` — your data (matches, players, heroes, rank history). Edit by hand or through the app.
 - `utils/data_io.py` — load/save helpers
 - `utils/stats.py` — all win rate / ban rate / pick rate / MVP calculations, computed live from matches.json
-- `pages/` — the 7 pages: Match Log, Player, Hero Summary, Add Match, Add Player/Hero, Player Ranks, Leaderboard
+- `pages/` — the 10 pages, browsing first and the three that write to `data/` last:
+  Match Log, Player, Hero Summary, Leaderboard, Player Cards, Head to Head, Friendship Buff,
+  then Add Match, Add Player/Hero, Player Ranks
+- `backfill_match_dates.py` — fills each match's `date` from the API's `start_time` (resumable; see **Match dates** below)
 - `utils/theme.py` — the game's palette, plus the contrast rules that decide when a hero color is safe to show
 - `utils/ui.py` — shared page furniture: the header mark, hero portraits, side sigils, award trophies
 - `assets/` + `data/palette.json`, `data/hero_visuals.json` — art and colors vendored from the Deadlock assets API
@@ -42,6 +45,29 @@ scene, and flat on a dark page 7 of the 38 fall below a 3:1 contrast ratio, wher
 wants 4.5:1. `utils/theme.py` lifts lightness until a color clears an actual contrast target,
 keeping the hue so heroes stay tellable apart. Get hero colors from `theme.hero_color` /
 `theme.hero_text_color` rather than reading `hero_visuals.json` directly.
+
+## Match dates
+
+Matches carry a `date`, taken from the API's `start_time` and converted to **US Eastern** before
+the calendar date is read off it. That conversion is the whole point: the group plays evenings,
+sessions run past midnight UTC, and a UTC date puts a Sunday night PUG on Monday. `utils/dates.py`
+holds the one definition, used by both the backfill and the Add Match form, so they cannot drift.
+
+To fill in matches that are still undated:
+
+```
+python backfill_match_dates.py
+```
+
+It only asks about matches whose date is missing and saves after each one, so it is safe to
+re-run and safe to interrupt. It is also slow by default, for a reason worth knowing: the API
+serves a match from its own cache at 100 requests/10s, but falls back to asking Steam at **3 per
+hour, per IP** — and our older PUGs are custom lobbies that never entered the API's database, so
+they are all on the slow path. An API key raises that to 300/hour:
+
+```
+DEADLOCK_API_KEY=... python backfill_match_dates.py
+```
 
 ## Ideas / backlog
 See [IDEAS.md](IDEAS.md) for the running shortlist of improvements, grouped by effort.

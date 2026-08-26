@@ -38,7 +38,7 @@ if not df.empty:
     # Sorting on match_id here would order the IDs as strings and bury the newest match.
     msum = stats.matches_summary_df(matches).iloc[::-1].head(10)
     st.dataframe(
-        msum[["match_id", "game_length", "win_side", "mvps", "key_players", "num_players"]],
+        ui.match_summary_display(msum),
         use_container_width=True, hide_index=True,
         column_config=ui.MATCH_SUMMARY_COLUMNS,
     )
@@ -46,15 +46,19 @@ else:
     st.info("No matches logged yet — head to **Add Match** to get started.")
 
 st.divider()
+# Reading pages first, then the three that write to data/. Page order here has to stay in step
+# with the number prefixes on the files, since those drive the sidebar independently.
 st.page_link("pages/1_Match_Log.py", label="Match Log")
 st.page_link("pages/2_Player.py", label="Player stats")
 st.page_link("pages/3_Hero_Summary.py", label="Hero summary")
-st.page_link("pages/4_Add_Match.py", label="Add a match")
-st.page_link("pages/5_Add_Player_Hero.py", label="Add player / hero")
-st.page_link("pages/6_Player_Ranks.py", label="Log player rank")
-st.page_link("pages/7_Leaderboard.py", label="Leaderboard")
-st.page_link("pages/8_Player_Cards.py", label="Player cards")
-st.page_link("pages/9_Head_to_Head.py", label="Head to head")
-st.page_link("pages/10_Chemistry.py", label="Friendship buff")
+st.page_link("pages/4_Leaderboard.py", label="Leaderboard")
+st.page_link("pages/5_Player_Cards.py", label="Player cards")
+st.page_link("pages/6_Head_to_Head.py", label="Head to head")
+st.page_link("pages/7_Chemistry.py", label="Friendship buff")
+
+st.caption("Keeping the data up to date")
+st.page_link("pages/8_Add_Match.py", label="Add a match")
+st.page_link("pages/9_Add_Player_Hero.py", label="Add player / hero")
+st.page_link("pages/10_Player_Ranks.py", label="Log player rank")
 
 ui.brand_footer()

@@ -1,6 +1,6 @@
 import datetime
 import streamlit as st
-from utils import data_io, ui
+from utils import data_io, dates, ui
 from utils.auth import require_edit_access
 
 st.set_page_config(page_title="Add Match", page_icon="assets/ui/puddle_punch.png", layout="wide")
@@ -80,6 +80,18 @@ with st.form("match_form", clear_on_submit=False):
         st.text_input("Match ID", value=match_id, disabled=True)
     else:
         match_id = st.text_input("Match ID", value="")
+
+    # Defaults to tonight where the group plays, not where the server runs - but it stays
+    # editable, because a match logged the morning after is not a match played that morning.
+    # An existing match the backfill has not reached yet opens empty rather than defaulting to
+    # today, so editing an old match for some unrelated reason cannot stamp it with this date.
+    if existing_match:
+        stored = existing_match.get("date")
+        default_date = datetime.date.fromisoformat(stored) if stored else None
+    else:
+        default_date = dates.today()
+    match_date = st.date_input("Date played", value=default_date,
+                               help="The night the match was played.")
 
     default_length = existing_match["game_length"] if existing_match else "30:00"
     game_length = st.text_input("Game length (MM:SS)", value=default_length)
@@ -191,7 +203,7 @@ with st.form("match_form", clear_on_submit=False):
                 })
             new_match = {
                 "match_id": match_id,
-                "date": existing_match["date"] if existing_match else str(datetime.date.today()),
+                "date": str(match_date) if match_date else None,
                 "game_length": game_length, "players": players_out,
                 "bans": bans, "first_picks": first_picks,
             }
