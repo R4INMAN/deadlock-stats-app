@@ -32,7 +32,7 @@ msum = msum[msum["match_id"].isin(filtered_ids)]
 
 st.caption(f"{len(msum)} match(es)")
 st.dataframe(
-    msum[["match_id", "game_length", "win_side", "mvps", "key_players", "num_players"]],
+    ui.match_summary_display(msum),
     use_container_width=True, hide_index=True,
     column_config=ui.MATCH_SUMMARY_COLUMNS,
 )

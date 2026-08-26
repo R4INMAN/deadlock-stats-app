@@ -9,10 +9,10 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 0 — Bugs and papercuts
 
-- [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `1009058275` is our newest match, but string-sorting
+- [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `100905275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
-- [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/4_Add_Match.py:190`).
+- [ ] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
       All 82 imported matches have slots 1–12; every match added since loses it. One form
       field to stop the bleed. **S**
 - [ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
@@ -35,7 +35,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 2 — Fun, social, and bragging rights
 
-- [x] **Player card.** *(done — `pages/8_Player_Cards.py`)* One screenshot-able block per person: portrait of their top hero,
+- [x] **Player card.** *(done — `pages/5_Player_Cards.py`)* One screenshot-able block per person: portrait of their top hero,
       W/L, rank badge, signature hero, MVP count, one weird stat. Built for pasting into
       Discord. **M**
 - [ ] **Awards / superlatives page.** Auto-computed, deliberately unserious: Farm King
@@ -44,7 +44,7 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
       each session so they rotate. **M**
 - [ ] **Streaks and records.** Longest win/loss streak, best single-game KDA, biggest souls
       lead, fastest and longest games. Cheap to compute, disproportionately fun. **S–M**
-- [x] **Head-to-head.** *(done — `pages/9_Head_to_Head.py`)* Pick two players: record when on the same team vs. opposite sides.
+- [x] **Head-to-head.** *(done — `pages/6_Head_to_Head.py`)* Pick two players: record when on the same team vs. opposite sides.
       Settles arguments; generates new ones. **M**
 - [ ] **"Since last week" digest.** After the API date backfill (Tier 4), a Home block
       showing what moved: biggest win-rate swing, new hero picks, streaks broken. Gives
@@ -72,7 +72,7 @@ rather than simplification.
 - [ ] **Hero strength vs. player skill.** Hero win rates are confounded — good players pick
       certain heroes. A mixed-effects logistic model (random effect per player, fixed effect
       per hero) separates the two and answers "is Wraith strong, or is Sulley strong?" **L**
-- [x] **Synergy and counter matrices.** *(done for players — `pages/10_Chemistry.py`; hero-pair synergy still open)* Pairwise win rate for teammate pairs and opposing
+- [x] **Synergy and counter matrices.** *(done for players — `pages/7_Chemistry.py`; hero-pair synergy still open)* Pairwise win rate for teammate pairs and opposing
       pairs, against the baseline predicted by each hero's solo rate. Needs shrinkage badly
       at 82 matches — most cells will have 1–3 games — so present it with a sample-size gate
       and an explicit "not enough data" state. **M–L**
@@ -87,14 +87,29 @@ rather than simplification.
 
 **Verified working 2026-08-25** against match `99935534`:
 `https://api.deadlock-api.com/v1/matches/{match_id}/metadata` — no auth, HTTP 200.
+**Send a User-Agent.** Python's default `Python-urllib/3.x` is refused with a 403; any
+real UA gets 200. Easy to misread as the API having died.
 
 The API reproduced our hand-entered row **exactly**: every K/D/A, `net_worth` 45.1k vs. our
 typed 45.0, `duration_s` 1895 → 31:35, and `mvp_rank` 1/2/3 matching our MVP and Key Player
 flags. It also carries `start_time`, so the date backfill is real.
 
-- [ ] **Backfill match dates.** `start_time` (unix) for all 82 matches. Unblocks every
-      calendar-based feature — season splits, "this month," real time-axis charts instead of
-      match-order proxies. **S–M**
+- [x] **Backfill match dates.** *(done — all 82, `backfill_match_dates.py`)* Not via the
+      per-match endpoint: our PUGs are custom lobbies the API never ingested, so they fall to a
+      Steam fetch capped at 3 req/hour per IP, and every Steam fetch attempted returned 503.
+      Ruled out along the way — bulk `/v1/matches/metadata` 404s on them, `match-history` across
+      all 78 known account_ids covered 0 of 35, and they are absent from `match_salts`,
+      `player_match_history` and `match_player` alike. They are simply not in the API's DB.
+      What worked: match IDs are sequential in time, so the public Parquet snapshot's 326M
+      (match_id, start_time) rows bracket each missing match within seconds. Holdout on the 47
+      known: median error 1s, 47/47 correct dates. **S–M**
+- [x] **`match_id` 1009058275 could not exist — corrected to `100905275`.** *(done)* The
+      largest real match ID on 2026-08-26 was 101,820,190; ours was ten times that, a stray `8`
+      typed after `100905`. `100905275` is a PrivateLobby of exactly 23:39 (our recorded game
+      length) whose 12 players are *all* known regulars, against 0 overlap for the nearest
+      coincidental match. Worth knowing the class exists: a mistyped ID is invisible until
+      something tries to look the match up. **S**
+
 - [ ] **Replace the 12-player form with "paste a match ID."** K/D/A, souls, heroes, teams,
       win, duration, and MVP all arrive from the API. This is the single biggest
       quality-of-life change available. **M–L**

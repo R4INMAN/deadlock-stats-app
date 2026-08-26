@@ -31,7 +31,7 @@ def match_sort_key(match_id):
 
     The game assigns these sequentially, so numeric order is chronological order. They're
     stored as strings, and sorting them as strings breaks the moment an ID gains a digit:
-    '1009058275' sorts below '99935534' lexically, burying the newest match at the bottom
+    '100905275' sorts below '99935534' lexically, burying the newest match at the bottom
     of every "recent" list. Non-numeric IDs sort last rather than raising.
     """
     s = str(match_id)

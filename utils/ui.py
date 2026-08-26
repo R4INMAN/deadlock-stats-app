@@ -71,16 +71,27 @@ def brand_footer():
 
 # --- shared column layouts ----------------------------------------------------------------------
 
-# The match summary table appears on both Home and the Match Log; the `date` column is dropped
-# because the imported history has no dates and a column of "None" is worse than no column.
+# The match summary table appears on both Home and the Match Log. `date` is backfilled from the
+# API's start_time; the matches it could not reach yet show an em dash rather than "None".
 MATCH_SUMMARY_COLUMNS = {
     "match_id": st.column_config.TextColumn("Match"),
+    "date": st.column_config.TextColumn("Date"),
     "game_length": st.column_config.TextColumn("Length"),
     "win_side": st.column_config.TextColumn("Won by"),
     "mvps": st.column_config.TextColumn("MVP"),
     "key_players": st.column_config.TextColumn("Key players"),
     "num_players": st.column_config.NumberColumn("Players"),
 }
+
+MATCH_SUMMARY_ORDER = ["match_id", "date", "game_length", "win_side", "mvps", "key_players",
+                       "num_players"]
+
+
+def match_summary_display(msum):
+    """Columns Home and the Match Log both show, with undated matches reading as an em dash."""
+    out = msum[MATCH_SUMMARY_ORDER].copy()
+    out["date"] = out["date"].fillna("—")
+    return out
 
 
 # --- hero portraits ---------------------------------------------------------------------------

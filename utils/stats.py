@@ -79,7 +79,10 @@ def player_summary_table(df):
     most_played = most_played.sort_values("n", ascending=False).drop_duplicates("player")
     most_played = most_played.rename(columns={"hero": "most_played_hero", "n": "most_played_hero_games"})
     g = g.merge(most_played[["player", "most_played_hero", "most_played_hero_games"]], on="player", how="left")
-    return g.sort_values("win_rate", ascending=False)
+    # Games first, not win rate: 83 players have played at all, and most of them once or twice,
+    # so a win-rate sort opens the page on a wall of 100%-in-one-game names. Win rate breaks
+    # ties so the order is still stable and still means something within a games count.
+    return g.sort_values(["games", "win_rate"], ascending=[False, False])
 
 
 def winrate_leaderboard(df, min_games=10, top_n=10):

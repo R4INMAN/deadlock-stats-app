@@ -12,7 +12,10 @@ streamlit run Home.py
 - `data/*.json` — your data (matches, players, heroes, rank history). Edit by hand or through the app.
 - `utils/data_io.py` — load/save helpers
 - `utils/stats.py` — all win rate / ban rate / pick rate / MVP calculations, computed live from matches.json
-- `pages/` — the 7 pages: Match Log, Player, Hero Summary, Add Match, Add Player/Hero, Player Ranks, Leaderboard
+- `pages/` — the 10 pages, browsing first and the three that write to `data/` last:
+  Match Log, Player, Hero Summary, Leaderboard, Player Cards, Head to Head, Friendship Buff,
+  then Add Match, Add Player/Hero, Player Ranks
+- `backfill_match_dates.py` — fills each match's `date` from the API's `start_time` (resumable; see **Match dates** below)
 - `utils/theme.py` — the game's palette, plus the contrast rules that decide when a hero color is safe to show
 - `utils/ui.py` — shared page furniture: the header mark, hero portraits, side sigils, award trophies
 - `assets/` + `data/palette.json`, `data/hero_visuals.json` — art and colors vendored from the Deadlock assets API
@@ -42,6 +45,34 @@ scene, and flat on a dark page 7 of the 38 fall below a 3:1 contrast ratio, wher
 wants 4.5:1. `utils/theme.py` lifts lightness until a color clears an actual contrast target,
 keeping the hue so heroes stay tellable apart. Get hero colors from `theme.hero_color` /
 `theme.hero_text_color` rather than reading `hero_visuals.json` directly.
+
+## Match dates
+
+All 82 matches carry a `date`, converted to **US Eastern** before the calendar date is read off
+it. That conversion is the whole point: the group plays evenings, sessions run past midnight
+UTC, and a UTC date puts a Sunday night PUG on Monday. `utils/dates.py` holds the one
+definition, used by both the backfill and the Add Match form, so they cannot drift.
+
+To fill in any match that is still undated:
+
+```
+pip install duckdb
+python backfill_match_dates.py
+```
+
+It reads the API's public daily database snapshot rather than the per-match endpoint, which
+matters: our PUGs are custom lobbies, and matches the API never ingested fall through to a
+Steam fetch capped at **3 requests per hour per IP**. The snapshot has no rate limit.
+
+Deadlock assigns match IDs sequentially, so match ID is monotonic in start time. A match that
+is in the snapshot gives its `start_time` directly. One that is not gets bracketed between the
+nearest IDs above and below — in practice seconds either side — and when both ends of the
+bracket land on the same local date, that date is proven rather than estimated.
+
+Checked by holdout against the 47 matches whose `start_time` we had fetched directly: median
+error 1 second, worst case 4 seconds, 47/47 on the correct calendar date. The finished set also
+falls out sensibly — 44 PUG nights, 53 of 82 matches on a Friday, Saturday or Sunday, and zero
+matches whose date disagrees with its match ID ordering.
 
 ## Ideas / backlog
 See [IDEAS.md](IDEAS.md) for the running shortlist of improvements, grouped by effort.
