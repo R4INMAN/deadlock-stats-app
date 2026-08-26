@@ -48,26 +48,31 @@ keeping the hue so heroes stay tellable apart. Get hero colors from `theme.hero_
 
 ## Match dates
 
-Matches carry a `date`, taken from the API's `start_time` and converted to **US Eastern** before
-the calendar date is read off it. That conversion is the whole point: the group plays evenings,
-sessions run past midnight UTC, and a UTC date puts a Sunday night PUG on Monday. `utils/dates.py`
-holds the one definition, used by both the backfill and the Add Match form, so they cannot drift.
+All 82 matches carry a `date`, converted to **US Eastern** before the calendar date is read off
+it. That conversion is the whole point: the group plays evenings, sessions run past midnight
+UTC, and a UTC date puts a Sunday night PUG on Monday. `utils/dates.py` holds the one
+definition, used by both the backfill and the Add Match form, so they cannot drift.
 
-To fill in matches that are still undated:
+To fill in any match that is still undated:
 
 ```
+pip install duckdb
 python backfill_match_dates.py
 ```
 
-It only asks about matches whose date is missing and saves after each one, so it is safe to
-re-run and safe to interrupt. It is also slow by default, for a reason worth knowing: the API
-serves a match from its own cache at 100 requests/10s, but falls back to asking Steam at **3 per
-hour, per IP** — and our older PUGs are custom lobbies that never entered the API's database, so
-they are all on the slow path. An API key raises that to 300/hour:
+It reads the API's public daily database snapshot rather than the per-match endpoint, which
+matters: our PUGs are custom lobbies, and matches the API never ingested fall through to a
+Steam fetch capped at **3 requests per hour per IP**. The snapshot has no rate limit.
 
-```
-DEADLOCK_API_KEY=... python backfill_match_dates.py
-```
+Deadlock assigns match IDs sequentially, so match ID is monotonic in start time. A match that
+is in the snapshot gives its `start_time` directly. One that is not gets bracketed between the
+nearest IDs above and below — in practice seconds either side — and when both ends of the
+bracket land on the same local date, that date is proven rather than estimated.
+
+Checked by holdout against the 47 matches whose `start_time` we had fetched directly: median
+error 1 second, worst case 4 seconds, 47/47 on the correct calendar date. The finished set also
+falls out sensibly — 44 PUG nights, 53 of 82 matches on a Friday, Saturday or Sunday, and zero
+matches whose date disagrees with its match ID ordering.
 
 ## Ideas / backlog
 See [IDEAS.md](IDEAS.md) for the running shortlist of improvements, grouped by effort.

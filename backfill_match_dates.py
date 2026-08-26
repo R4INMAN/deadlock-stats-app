@@ -1,94 +1,102 @@
-"""Fill in each match's `date` from the Deadlock API's `start_time`.
+"""Fill in each match's `date` from the Deadlock API's public database snapshot.
 
-Run it as many times as you like: it only asks the API about matches whose date is still
-missing, and it writes after every success, so an interrupted run keeps what it got.
+    python backfill_match_dates.py          # needs: pip install duckdb
 
-    python backfill_match_dates.py
+Why not the per-match API endpoint: it works, but our PUGs are custom lobbies, and matches the
+API never ingested fall through to a Steam fetch capped at **3 requests per hour per IP** -
+failed attempts included. 35 of our 82 were on that path, and every Steam fetch attempted came
+back 503. This route has no rate limit at all.
 
-Two things worth knowing before you wonder why it is slow.
+How it works. Deadlock assigns match IDs sequentially, so match ID is monotonic in start time.
+The API publishes a daily Parquet snapshot of its whole database, including 326M rows of
+(match_id, start_time). For a match that is in the snapshot we read its start_time directly.
+For one that is not - every custom lobby - we bracket it between the nearest match IDs above
+and below, which in practice sit within a few seconds either side. When both ends of the
+bracket fall on the same local date, that date is not an estimate but a proof: the match ID
+ordering guarantees the real start time lies between them.
 
-The API serves a match from its own cache when it has one and falls back to asking Steam when
-it does not, and those two paths have very different rate limits - 100 requests per 10s from
-cache, but only 3 PER HOUR from Steam, counted per IP. Our older PUGs are custom lobbies that
-never made it into the API's database, so they are all on the slow path. Set a key to raise
-that to 300/hour and finish in one run:
-
-    DEADLOCK_API_KEY=... python backfill_match_dates.py
-
-The script stops as soon as it is rate limited rather than burning attempts against the quota,
-and tells you when the window reopens. Failed attempts count against it too, so retrying in a
-tight loop makes things worse, not better.
+Validated by holdout on the 47 matches whose start_time we had fetched directly: median error
+1 second, worst case 4 seconds, and 47/47 landed on the correct calendar date.
 """
+import bisect
 import json
-import os
 import sys
-import time
-import urllib.error
-import urllib.request
 
 from utils import data_io
 from utils.dates import local_date
 
-API = "https://api.deadlock-api.com/v1/matches/{match_id}/metadata"
-USER_AGENT = "deadlock-stats-app/0.1 (+github.com/R4INMAN/deadlock-stats-app)"
+SNAPSHOT = "https://s3-cache.deadlock-api.com/db-snapshot/public/match_player"
+PARTS = 102
+# How far either side of a match ID to look for neighbours. Matches are dense enough that a few
+# thousand IDs is a window of seconds; wider costs little because Parquet row-group statistics
+# let DuckDB skip everything outside the range.
+WINDOW = 3000
 
 
-def fetch_start_time(match_id, api_key=None):
-    """(start_time, None) on success, (None, reason) on failure.
-
-    Reason is the sentinel "rate-limited" when we have run out of quota, which the caller
-    treats as "stop", not "skip" - every further request would just be refused.
-    """
-    request = urllib.request.Request(API.format(match_id=match_id))
-    request.add_header("User-Agent", USER_AGENT)
-    if api_key:
-        request.add_header("X-API-KEY", api_key)
+def neighbour_pairs(targets):
+    """Sorted (match_id, start_time) for every match near one of `targets`."""
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
-            start_time = json.load(response)["match_info"].get("start_time")
-        return (start_time, None) if start_time else (None, "no start_time in response")
-    except urllib.error.HTTPError as exc:
-        if exc.code == 429:
-            return None, "rate-limited"
-        # 503 here means the API reached Steam and Steam declined; it is worth retrying later,
-        # but the attempt has already cost us quota, so treat it like the limit and back off.
-        if exc.code == 503:
-            return None, "rate-limited"
-        return None, f"HTTP {exc.code}"
-    except Exception as exc:
-        return None, f"{type(exc).__name__}: {exc}"
+        import duckdb
+    except ImportError:
+        sys.exit("This needs DuckDB to read the snapshot:\n\n    pip install duckdb\n")
+    files = "[" + ",".join(f"'{SNAPSHOT}/match_player_{i}.parquet'" for i in range(PARTS)) + "]"
+    ranges = " OR ".join(f"(match_id BETWEEN {t - WINDOW} AND {t + WINDOW})" for t in targets)
+    con = duckdb.connect()
+    con.execute("INSTALL httpfs; LOAD httpfs;")
+    con.execute("SET TimeZone='UTC';")
+    rows = con.execute(
+        f"SELECT DISTINCT match_id, epoch(start_time)::BIGINT FROM read_parquet({files}) "
+        f"WHERE {ranges}"
+    ).fetchall()
+    return sorted({(int(m), int(s)) for m, s in rows if s and s > 0})
+
+
+def date_for(match_id, pairs, ids):
+    """(date, how) for one match ID, or (None, reason) when it cannot be placed."""
+    i = bisect.bisect_left(ids, match_id)
+    if i < len(ids) and ids[i] == match_id:
+        return local_date(pairs[i][1]), "exact"
+    lo = pairs[i - 1] if i > 0 else None
+    hi = pairs[i] if i < len(pairs) else None
+    if not (lo and hi):
+        return None, "no bracketing matches in the snapshot"
+    low_date, high_date = local_date(lo[1]), local_date(hi[1])
+    if low_date == high_date:
+        # Both ends of the bracket are the same day, so the ID ordering proves the date.
+        return low_date, "bracketed"
+    fraction = (match_id - lo[0]) / (hi[0] - lo[0])
+    return local_date(lo[1] + fraction * (hi[1] - lo[1])), "interpolated"
 
 
 def main():
-    api_key = os.environ.get("DEADLOCK_API_KEY")
     matches = data_io.load_matches()
     todo = [m for m in matches if not m.get("date")]
-    print(f"{len(matches) - len(todo)}/{len(matches)} matches already dated; {len(todo)} to go.")
+    print(f"{len(matches) - len(todo)}/{len(matches)} already dated; {len(todo)} to fill.")
     if not todo:
         return 0
-    if not api_key:
-        print("No DEADLOCK_API_KEY set - uncached matches are capped at 3/hour.")
+
+    targets = [int(m["match_id"]) for m in todo]
+    print("Reading the snapshot (a few seconds per pass, no rate limit)...")
+    pairs = neighbour_pairs(targets)
+    ids = [p[0] for p in pairs]
+    print(f"  {len(pairs):,} neighbouring matches pulled.")
 
     filled = 0
     for match in todo:
-        match_id = match["match_id"]
-        start_time, problem = fetch_start_time(match_id, api_key)
-        if problem == "rate-limited":
-            print(f"  {match_id}: rate limited - stopping with {filled} filled this run.")
-            print("  Re-run later to pick up where this left off.")
-            break
-        if problem:
-            print(f"  {match_id}: {problem}")
+        date, how = date_for(int(match["match_id"]), pairs, ids)
+        if not date:
+            print(f"  {match['match_id']}: {how}")
             continue
-        match["date"] = local_date(start_time)
-        # Save per match so a run that dies halfway still banks its progress.
-        data_io.save_matches(matches)
+        match["date"] = date
         filled += 1
-        print(f"  {match_id}: {match['date']}")
-        time.sleep(0.4)
+        print(f"  {match['match_id']}: {date} ({how})")
+    data_io.save_matches(matches)
 
     remaining = sum(1 for m in matches if not m.get("date"))
-    print(f"\nFilled {filled} this run. {remaining} still undated.")
+    print(f"\nFilled {filled}. {remaining} still undated.")
+    if remaining:
+        print("A match ID with no bracketing neighbours is usually one that cannot exist - "
+              "check it against the ID shown in game.")
     return 0
 
 

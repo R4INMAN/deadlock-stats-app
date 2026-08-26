@@ -94,17 +94,21 @@ The API reproduced our hand-entered row **exactly**: every K/D/A, `net_worth` 45
 typed 45.0, `duration_s` 1895 → 31:35, and `mvp_rank` 1/2/3 matching our MVP and Key Player
 flags. It also carries `start_time`, so the date backfill is real.
 
-- [~] **Backfill match dates.** *(47 of 82 done — `backfill_match_dates.py`)* `start_time`
-      converted to US Eastern before the date is read, since sessions run past midnight UTC
-      and a UTC date lands a Sunday PUG on Monday. `utils/dates.py` is the single definition.
-      The remaining 35 are the blocker worth understanding: they are custom lobbies that never
-      entered the API's ClickHouse DB, so they only exist in Steam's archive, and the Steam
-      fallback is capped at **3 requests/hour per IP** — failed attempts included. Two dead
-      ends already checked: the bulk `/v1/matches/metadata` endpoint 404s on all of them, and
-      unioning `match-history` across all 78 known account_ids covered **0** of the 35. An API
-      key (300/hour) finishes it in one run; without one it is ~12h of trickling, and the three
-      Steam fetches attempted so far all returned 503. Unblocks every calendar-based feature —
-      season splits, "this month," real time-axis charts instead of match-order proxies. **S–M**
+- [x] **Backfill match dates.** *(done — all 82, `backfill_match_dates.py`)* Not via the
+      per-match endpoint: our PUGs are custom lobbies the API never ingested, so they fall to a
+      Steam fetch capped at 3 req/hour per IP, and every Steam fetch attempted returned 503.
+      Ruled out along the way — bulk `/v1/matches/metadata` 404s on them, `match-history` across
+      all 78 known account_ids covered 0 of 35, and they are absent from `match_salts`,
+      `player_match_history` and `match_player` alike. They are simply not in the API's DB.
+      What worked: match IDs are sequential in time, so the public Parquet snapshot's 326M
+      (match_id, start_time) rows bracket each missing match within seconds. Holdout on the 47
+      known: median error 1s, 47/47 correct dates. **S–M**
+- [ ] **`match_id` 1009058275 cannot exist — likely a typo for `100905275`.** The largest real
+      match ID as of 2026-08-26 is 101,820,190; ours is ten times that. `100905275` is a
+      PrivateLobby of exactly 23:39 (our recorded length) whose 12 players are *all* known
+      regulars, against 0 overlap for the nearest coincidental match. Its date is filled in
+      already; the ID itself is left as recorded pending a decision. **S**
+
 - [ ] **Replace the 12-player form with "paste a match ID."** K/D/A, souls, heroes, teams,
       win, duration, and MVP all arrive from the API. This is the single biggest
       quality-of-life change available. **M–L**
