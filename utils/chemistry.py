@@ -20,17 +20,20 @@ together, given how they do apart, against the opponents they actually faced? Su
 from what they did win and what is left - the synergy - is the part that is genuinely about
 the pairing. `utils.ratings` builds the baseline; everything here measures against it.
 
-So this module does four things:
+So this module does five things:
 
 1. `pair_records` - the raw counts, with a Wilson confidence interval, so a pair's record is
    always shown next to how much it is worth trusting.
 2. `pair_synergy` - the same pairs, minus their baseline. This is the "more than the sum of
    their parts" number, with an exact Poisson-binomial p-value for it.
-3. `chemistry_test` - a parametric bootstrap answering the global question: is there MORE
+3. `opponent_edge` - the same arithmetic across the net: how two players do when they are
+   on OPPOSITE sides, minus what the baseline expected of those matchups. A "kryptonite" is
+   the most negative of these, and it earns more suspicion than a synergy number, not less.
+4. `chemistry_test` - a parametric bootstrap answering the global question: is there MORE
    spread across pairs than individual skill and luck alone produce? This is the honest
    version of "is the friendship buff real", and it costs nothing to be wrong about a
    single pair.
-4. `cohesion_test` - a far better-powered test of the same theory. Instead of estimating 850
+5. `cohesion_test` - a far better-powered test of the same theory. Instead of estimating 850
    pair effects from 82 outcomes, it asks one question: does the side with more shared
    history beat its baseline? One parameter against 82 matches has real statistical power,
    where the per-pair view has almost none.
@@ -122,6 +125,23 @@ def _pair_appearances(side_list):
     return out
 
 
+def _opponent_appearances(side_list):
+    """pair -> list of (match index, True if the pair's FIRST player was on side A).
+
+    Deliberately the same shape as `_pair_appearances`, so everything downstream - the win
+    count, the baseline, the Poisson-binomial p-value - works on either without knowing
+    which side of the net it is looking at. The only difference is that here the two are
+    opponents, so `is_a` orients the row on pair[0] rather than on the pair as a unit.
+    """
+    out = collections.defaultdict(list)
+    for i, (a, b, _) in enumerate(side_list):
+        for x in a:
+            for y in b:
+                pair = (x, y) if x < y else (y, x)
+                out[pair].append((i, pair[0] == x))
+    return out
+
+
 def pair_records(matches, min_games=MIN_GAMES_DEFAULT, side_list=None):
     """Every teammate pair's record together, filtered to min_games.
 
@@ -173,6 +193,17 @@ def _records_probability(a_record, b_record):
     return 1 / (1 + math.exp(-logit))
 
 
+def _matchup_probability(a_record, b_record):
+    """The opponent mirror of `_records_probability`: two apart-edges subtracted, not added.
+
+    Across the net the two records work against each other, so a 60% player facing a 40%
+    player comes out around 70% - the same credulous "their reputations explain it all"
+    baseline, pointed the other way.
+    """
+    logit = _record_logit(*a_record) - _record_logit(*b_record)
+    return 1 / (1 + math.exp(-logit))
+
+
 def baseline_lambda(matches, side_list=None):
     """The shrinkage the season's results actually support, reused across every pair fit.
 
@@ -196,6 +227,67 @@ def _apart_record(side_list, player, exclude):
     return games, wins
 
 
+def _baselined_rows(matches, appearances, combine, min_games, mode, lam, side_list):
+    """Shared core of `pair_synergy` and `opponent_edge`.
+
+    Both ask one question of one fit - what did these two do across the games they shared,
+    against what the baseline expected of exactly those games - and differ only in which
+    games count as shared (`appearances`) and in how two apart-records combine into a single
+    expectation (`combine`). `is_a` orients each row, so "wins" always counts the matches
+    pair[0]'s side won: for teammates that is both of them, for opponents it is the first.
+    """
+    rows = []
+    for pair, appears in appearances.items():
+        if len(appears) < min_games:
+            continue
+        drop = [i for i, _ in appears]
+        exclude = set(drop)
+        a_games, a_wins = _apart_record(side_list, pair[0], exclude)
+        b_games, b_wins = _apart_record(side_list, pair[1], exclude)
+
+        if mode == BASELINE_RECORDS:
+            # One number for the pairing, so every shared match carries the same expectation.
+            probs = np.full(len(drop), combine((a_games, a_wins), (b_games, b_wins)))
+        else:
+            model = ratings.fit(matches, lam=lam, drop=drop, side_list=side_list)
+            # Re-orient from "side A wins" to "pair[0]'s side wins".
+            probs = np.array([
+                ratings.win_probability(model, side_list[i][0], side_list[i][1]) if is_a
+                else 1 - ratings.win_probability(model, side_list[i][0], side_list[i][1])
+                for i, is_a in appears
+            ])
+
+        games = len(appears)
+        wins = sum(1 for i, is_a in appears if side_list[i][2] == is_a)
+        expected = float(probs.mean())
+        lo, hi = wilson_interval(wins, games)
+
+        rows.append({
+            "player_a": pair[0],
+            "player_b": pair[1],
+            "games": games,
+            "wins": wins,
+            "losses": games - wins,
+            "win_rate": wins / games,
+            "ci_low": lo,
+            "ci_high": hi,
+            "beats_noise": lo > 0.5 or hi < 0.5,
+            "expected": expected,
+            "expected_wins": float(probs.sum()),
+            # The headline: win rate above what these two were due, in percentage points.
+            "edge": wins / games - expected,
+            "edge_low": lo - expected,
+            "edge_high": hi - expected,
+            "p_value": _two_sided_p(wins, probs),
+            # WOWY context, so the baseline is legible without trusting the model.
+            "a_apart_games": a_games,
+            "a_apart_rate": (a_wins / a_games) if a_games else None,
+            "b_apart_games": b_games,
+            "b_apart_rate": (b_wins / b_games) if b_games else None,
+        })
+    return rows
+
+
 def pair_synergy(matches, min_games=MIN_GAMES_DEFAULT, mode=BASELINE_MODEL, lam=None,
                  side_list=None):
     """Every qualifying pair, measured against what the two would be expected to win anyway.
@@ -214,57 +306,45 @@ def pair_synergy(matches, min_games=MIN_GAMES_DEFAULT, mode=BASELINE_MODEL, lam=
     if lam is None and mode == BASELINE_MODEL:
         lam = baseline_lambda(matches, side_list)
 
-    rows = []
-    for pair, appearances in _pair_appearances(side_list).items():
-        if len(appearances) < min_games:
-            continue
-        drop = [i for i, _ in appearances]
-        exclude = set(drop)
-        a_games, a_wins = _apart_record(side_list, pair[0], exclude)
-        b_games, b_wins = _apart_record(side_list, pair[1], exclude)
-
-        if mode == BASELINE_RECORDS:
-            # One number for the pairing, so every shared match carries the same expectation.
-            probs = np.full(len(drop),
-                            _records_probability((a_games, a_wins), (b_games, b_wins)))
-        else:
-            model = ratings.fit(matches, lam=lam, drop=drop, side_list=side_list)
-            # Re-orient from "side A wins" to "this pair wins".
-            probs = np.array([
-                ratings.win_probability(model, side_list[i][0], side_list[i][1]) if is_a
-                else 1 - ratings.win_probability(model, side_list[i][0], side_list[i][1])
-                for i, is_a in appearances
-            ])
-
-        games = len(appearances)
-        wins = sum(1 for i, is_a in appearances if side_list[i][2] == is_a)
-        expected = float(probs.mean())
-        lo, hi = wilson_interval(wins, games)
-
-        rows.append({
-            "player_a": pair[0],
-            "player_b": pair[1],
-            "games": games,
-            "wins": wins,
-            "losses": games - wins,
-            "win_rate": wins / games,
-            "ci_low": lo,
-            "ci_high": hi,
-            "beats_noise": lo > 0.5 or hi < 0.5,
-            "expected": expected,
-            "expected_wins": float(probs.sum()),
-            # The headline: win rate above what these two were due, in percentage points.
-            "synergy": wins / games - expected,
-            "synergy_low": lo - expected,
-            "synergy_high": hi - expected,
-            "p_value": _two_sided_p(wins, probs),
-            # WOWY context, so the baseline is legible without trusting the model.
-            "a_apart_games": a_games,
-            "a_apart_rate": (a_wins / a_games) if a_games else None,
-            "b_apart_games": b_games,
-            "b_apart_rate": (b_wins / b_games) if b_games else None,
-        })
+    rows = _baselined_rows(matches, _pair_appearances(side_list), _records_probability,
+                           min_games, mode, lam, side_list)
+    # "Edge" is the neutral word the shared core uses; between teammates it has a better one.
+    for r in rows:
+        r["synergy"] = r.pop("edge")
+        r["synergy_low"] = r.pop("edge_low")
+        r["synergy_high"] = r.pop("edge_high")
     rows.sort(key=lambda r: (-r["synergy"], -r["games"]))
+    return rows
+
+
+def opponent_edge(matches, min_games=MIN_GAMES_DEFAULT, mode=BASELINE_MODEL, lam=None,
+                  side_list=None):
+    """Every pair who have faced each other, measured against what the matchup was due.
+
+    `pair_synergy` across the net: refit the baseline without the games the two spent on
+    opposite sides, score exactly those games, subtract. `edge` is player_a's win rate in
+    the matchup minus the baseline's expectation for it, in percentage points.
+
+    Dropping the shared games matters more here than it does for teammates. Every match in a
+    head-to-head record is a win for one of them and a loss for the other, so leaving those
+    games in the fit lifts the winner's rating and sinks the loser's using the very games
+    the baseline is about to be scored on. The model would then expect the result it had
+    already been shown, and every matchup would come back flat.
+
+    Read the output with more suspicion than a synergy figure, not less. Each of the two is
+    one player in twelve, they meet only because someone sorted the teams that way, and
+    results-only data cannot separate "that player has their number" from the pair having
+    landed on lopsided sides whenever they met.
+    """
+    side_list = ratings.sides(matches) if side_list is None else side_list
+    if not side_list:
+        return []
+    if lam is None and mode == BASELINE_MODEL:
+        lam = baseline_lambda(matches, side_list)
+
+    rows = _baselined_rows(matches, _opponent_appearances(side_list), _matchup_probability,
+                           min_games, mode, lam, side_list)
+    rows.sort(key=lambda r: (-r["edge"], -r["games"]))
     return rows
 
 
@@ -281,6 +361,57 @@ def player_pair_records(matches, player, min_games=MIN_GAMES_DEFAULT, mode=BASEL
         r["teammate"] = r["player_b"] if r["player_a"] == player else r["player_a"]
         r["teammate_apart_rate"] = (r["b_apart_rate"] if r["player_a"] == player
                                     else r["a_apart_rate"])
+    return mine
+
+
+def _from_b_side(row):
+    """An `opponent_edge` row rewritten from player_b's end of the matchup.
+
+    Rows leave the core oriented on player_a, so half of any one player's matchups arrive
+    backwards. Everything with a direction gets mirrored; `games`, `p_value` and
+    `beats_noise` are the same fact seen from either end, so they are left alone.
+    """
+    games, wins = row["games"], row["losses"]
+    expected = 1 - row["expected"]
+    lo, hi = wilson_interval(wins, games)
+    return {
+        **row,
+        "wins": wins,
+        "losses": row["wins"],
+        "win_rate": wins / games,
+        "ci_low": lo,
+        "ci_high": hi,
+        "expected": expected,
+        "expected_wins": games - row["expected_wins"],
+        "edge": wins / games - expected,
+        "edge_low": lo - expected,
+        "edge_high": hi - expected,
+    }
+
+
+def player_opponent_records(matches, player, min_games=MIN_GAMES_DEFAULT, mode=BASELINE_MODEL,
+                            rows=None):
+    """One player's matchups, worst first - "who beats me more than they should".
+
+    Every row is oriented so its fields read from `player`'s end of the matchup, and the
+    sort is by edge ascending, so the head of the list is the opponent this player loses to
+    beyond the baseline rather than simply the strongest opponent they have faced.
+    """
+    rows = opponent_edge(matches, min_games, mode) if rows is None else rows
+    mine = []
+    for r in rows:
+        if r["player_a"] == player:
+            row = dict(r)
+            row["opponent"] = r["player_b"]
+            row["opponent_apart_rate"] = r["b_apart_rate"]
+        elif r["player_b"] == player:
+            row = _from_b_side(r)
+            row["opponent"] = r["player_a"]
+            row["opponent_apart_rate"] = r["a_apart_rate"]
+        else:
+            continue
+        mine.append(row)
+    mine.sort(key=lambda r: (r["edge"], -r["games"]))
     return mine
 
 
