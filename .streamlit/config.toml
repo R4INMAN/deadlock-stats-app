@@ -1,0 +1,15 @@
+# Colors are the game's own, vendored to data/palette.json by fetch_deadlock_assets.py.
+# Streamlit's theme only takes literal values, so these are copied by hand - re-run the fetch
+# script and diff data/palette.json if Valve ever repaints the UI.
+[theme]
+base = "dark"
+primaryColor = "#319826"             # viscous_color - Puddle Punch green
+backgroundColor = "#10130D"          # off_black
+secondaryBackgroundColor = "#1C201A" # off_black, lifted just enough to separate cards and tables
+textColor = "#FFEFD7"                # base_text - the game's warm off-white
+borderColor = "#3A4034"
+baseRadius = "small"
+
+[theme.sidebar]
+backgroundColor = "#161A14"
+borderColor = "#3A4034"

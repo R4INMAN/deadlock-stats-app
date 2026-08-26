@@ -1,12 +1,12 @@
 import streamlit as st
-from utils import data_io
+from utils import data_io, ui
 from utils.auth import require_edit_access
 
 if not require_edit_access():
     st.stop()
     
-st.set_page_config(page_title="Add Player / Hero", page_icon="🆕", layout="wide")
-st.title("🆕 Add Player / Hero")
+st.set_page_config(page_title="Add Player / Hero", page_icon="assets/ui/puddle_punch.png", layout="wide")
+ui.page_header("Add Player / Hero", "Register someone new before their first game.")
 
 players = data_io.load_players()
 heroes = data_io.load_heroes()
@@ -49,3 +49,5 @@ with col2:
 
     st.markdown(f"**Current heroes ({len(heroes)}):**")
     st.dataframe(sorted(heroes), use_container_width=True, hide_index=True)
+
+ui.brand_footer()

@@ -1,7 +1,7 @@
 """One screenshot-able block per player - built to be pasted into Discord, not scrolled past."""
 import streamlit as st
 
-from utils import chemistry, data_io, stats
+from utils import chemistry, data_io, stats, theme, ui
 
 st.set_page_config(page_title="Player Cards", page_icon="🪪", layout="wide")
 st.title("🪪 Player Cards")
@@ -30,8 +30,11 @@ hero_counts = pdf["hero"].value_counts()
 signature = hero_counts.index[0]
 sig_games = int(hero_counts.iloc[0])
 sig_visual = visuals.get(signature, {})
-accent = sig_visual.get("color") or "#8892A6"
-portrait = data_io.hero_icon_data_uri(sig_visual.get("icon"))
+# Via theme rather than straight off the visual: a few of the official hero colors are too dark
+# to read on this page's background, and theme lifts those while keeping the hue.
+accent = theme.hero_color(sig_visual)
+accent_text = theme.hero_text_color(sig_visual)
+portrait = ui.hero_portrait_uris().get(signature)
 
 wins = int(pdf["win"].sum())
 games = len(pdf)
@@ -51,7 +54,7 @@ st.markdown(
     <div>
       <div style="font-size:1.9rem;font-weight:700;line-height:1.1;">{chosen}</div>
       <div style="opacity:.75;font-size:.95rem;">
-        {rank or 'unranked'} &nbsp;·&nbsp; signature hero <b style="color:{accent};">{signature}</b> ({sig_games}g)
+        {rank or 'unranked'} &nbsp;·&nbsp; signature hero <b style="color:{accent_text};">{signature}</b> ({sig_games}g)
       </div>
     </div>
   </div>

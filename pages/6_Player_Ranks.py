@@ -1,13 +1,13 @@
 import datetime
 import streamlit as st
-from utils import data_io
+from utils import data_io, ui
 from utils.auth import require_edit_access
 
 if not require_edit_access():
     st.stop()
     
-st.set_page_config(page_title="Player Ranks", page_icon="📈", layout="wide")
-st.title("📈 Player Ranks")
+st.set_page_config(page_title="Player Ranks", page_icon="assets/ui/puddle_punch.png", layout="wide")
+ui.page_header("Player Ranks", "Reported ranks over time.")
 
 players = data_io.load_players()
 ranks = data_io.load_ranks()
@@ -44,3 +44,5 @@ player_pick = st.selectbox("View history for", ["All"] + sorted(players.keys()))
 history = ranks if player_pick == "All" else [r for r in ranks if r["player"] == player_pick]
 history = sorted(history, key=lambda r: (r["player"], r["date"]))
 st.dataframe(history, use_container_width=True, hide_index=True)
+
+ui.brand_footer()

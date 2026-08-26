@@ -4,7 +4,7 @@ def require_edit_access():
     if st.session_state.get("edit_unlocked"):
         return True
 
-    st.subheader("🔒 Edit access required")
+    st.subheader("Edit access required")
     pw = st.text_input("Password", type="password")
     if st.button("Unlock"):
         if pw == st.secrets["edit_password"]:

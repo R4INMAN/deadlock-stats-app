@@ -1,13 +1,12 @@
-import colorsys
 import math
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-from utils import data_io, stats
+from utils import data_io, stats, theme, ui
 
-st.set_page_config(page_title="Hero Summary", page_icon="🦸", layout="wide")
-st.title("🦸 Hero Summary")
+st.set_page_config(page_title="Hero Summary", page_icon="assets/ui/puddle_punch.png", layout="wide")
+ui.page_header("Hero Summary", "Pick rates, ban rates, and who the meta is contesting.")
 
 matches = data_io.load_matches()
 heroes = data_io.load_heroes()
@@ -26,11 +25,27 @@ display = table.copy()
 for c in ["win_rate", "pick_rate", "ban_rate", "first_pick_rate", "draft_participation_rate"]:
     display[c] = (display[c] * 100).round(1)
 display["avg_kp_pct"] = display["avg_kp_pct"].round(1)
+display["portrait"] = ui.hero_portrait_column(display["hero"])
 st.dataframe(
-    display[["hero", "games", "win_rate", "draft_participation_rate", "pick_rate", "ban_rate",
-              "first_pick_rate", "mvp_count", "key_player_count", "top_player", "top_player_games"]]
+    display[["portrait", "hero", "games", "win_rate", "draft_participation_rate", "pick_rate",
+              "ban_rate", "first_pick_rate", "mvp_count", "key_player_count", "top_player",
+              "top_player_games"]]
     .sort_values("draft_participation_rate", ascending=False),
     use_container_width=True, hide_index=True,
+    column_config={
+        "portrait": st.column_config.ImageColumn("", width="small"),
+        "hero": st.column_config.TextColumn("Hero"),
+        "games": st.column_config.NumberColumn("Games"),
+        "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
+        "draft_participation_rate": st.column_config.NumberColumn("Draft particip.", format="%.1f%%"),
+        "pick_rate": st.column_config.NumberColumn("Pick rate", format="%.1f%%"),
+        "ban_rate": st.column_config.NumberColumn("Ban rate", format="%.1f%%"),
+        "first_pick_rate": st.column_config.NumberColumn("First pick", format="%.1f%%"),
+        "mvp_count": st.column_config.NumberColumn("MVP"),
+        "key_player_count": st.column_config.NumberColumn("Key player"),
+        "top_player": st.column_config.TextColumn("Top player"),
+        "top_player_games": st.column_config.NumberColumn("Their games"),
+    },
 )
 
 st.divider()
@@ -43,6 +58,8 @@ detail = stats.hero_detail(df, chosen, total_matches, matches=matches)
 if detail["games"] == 0 and not detail["ban_rate"]:
     st.info(f"{chosen} hasn't shown up in a draft yet.")
 else:
+    st.markdown(ui.hero_chip(chosen, size=44, label=f"<b>{chosen}</b>"), unsafe_allow_html=True)
+
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Games played", detail["games"])
     c2.metric("Win rate", f"{detail['win_rate']*100:.1f}%" if detail["win_rate"] is not None else "n/a")
@@ -54,7 +71,16 @@ else:
         pb = detail["player_breakdown"].copy()
         pb["win_rate"] = (pb["win_rate"] * 100).round(1)
         pb["avg_kp_pct"] = pb["avg_kp_pct"].round(1)
-        st.dataframe(pb, use_container_width=True, hide_index=True)
+        st.dataframe(
+            pb, use_container_width=True, hide_index=True,
+            column_config={
+                "player": st.column_config.TextColumn("Player"),
+                "games": st.column_config.NumberColumn("Games"),
+                "wins": st.column_config.NumberColumn("Wins"),
+                "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
+                "avg_kp_pct": st.column_config.NumberColumn("Avg KP%", format="%.1f"),
+            },
+        )
 
 st.divider()
 st.subheader("Who the meta is contesting")
@@ -81,18 +107,10 @@ else:
     chart_heroes = sorted(timeline["hero"].unique())
     visuals = data_io.load_hero_visuals()
 
-    def _brighten(hex_color, floor=0.52):
-        """Official hero colors are tuned for the game UI; several are too dark to read as a
-        line on a chart. Lift lightness to a floor while keeping the hue that identifies them."""
-        h, l, s = colorsys.rgb_to_hls(*(int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5)))
-        r, g, b = colorsys.hls_to_rgb(h, max(l, floor), max(s, 0.45))
-        return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
-
-    fallback = "#8892a6"
-    color_map = {
-        h: _brighten((visuals.get(h) or {}).get("color") or fallback)
-        for h in chart_heroes
-    }
+    # A chart line is a graphical object, so it only has to clear 3:1 - but these lines sit
+    # against each other as much as against the background, so they get the stricter text
+    # target to keep five of them tellable apart.
+    color_map = {h: theme.hero_text_color(visuals.get(h)) for h in chart_heroes}
 
     seqs = sorted(timeline["match_seq"].unique())
     full_index = pd.MultiIndex.from_product([chart_heroes, seqs], names=["hero", "match_seq"])
@@ -194,7 +212,7 @@ else:
 
     for ep in endpoints:
         hero, ex, ey = ep["hero"], ep["label_x"], ep["label_y"]
-        icon = data_io.hero_icon_data_uri((visuals.get(hero) or {}).get("icon"))
+        icon = ui.hero_portrait_uris().get(hero)
         if icon:
             fig.add_layout_image(dict(
                 source=icon, xref="x", yref="y", x=ex, y=ey,
@@ -206,6 +224,10 @@ else:
                                 xshift=8, font=dict(size=12, color=color_map[hero]))
 
     fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color=theme.color("base_text")),
         showlegend=False,
         hovermode="closest",
         xaxis=dict(
@@ -232,10 +254,10 @@ else:
     st.markdown(f"**Most contested over the last {window} matches**")
     cols = st.columns(len(latest))
     for col, (_, row) in zip(cols, latest.iterrows()):
-        icon_path = data_io.hero_icon_path((visuals.get(row["hero"]) or {}).get("icon"))
+        portrait_path = data_io.hero_portrait_path((visuals.get(row["hero"]) or {}).get("portrait"))
         with col:
-            if icon_path:
-                st.image(icon_path, width=52)
+            if portrait_path:
+                st.image(portrait_path, width=52)
             st.metric(row["hero"], f"{row['participation_rate']*100:.0f}%")
 
     with st.expander("View underlying data"):
@@ -252,3 +274,5 @@ else:
             .sort_values(["match_#", "rank"]),
             use_container_width=True, hide_index=True,
         )
+
+ui.brand_footer()
