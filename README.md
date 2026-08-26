@@ -1,5 +1,7 @@
 # Deadlock PUG Stats Tracker
 
+![The app themed with Deadlock's own palette](docs/screenshots/01-before-after.png)
+
 ## Run it
 ```
 pip install -r requirements.txt
@@ -32,6 +34,8 @@ python fetch_deadlock_assets.py
 That pulls each hero's 128px portrait and official color, the two side sigils (the Hidden King's
 crown and the Archmother's keyhole hand), the post-game award trophies, Viscous' Puddle Punch
 ability icon — the group's mark — and the subset of the game's named colors the theme uses.
+
+![The meta trend chart](docs/screenshots/04-meta-chart.png)
 
 One thing worth knowing before changing colors: the game tunes its hero colors for a lit 3D
 scene, and flat on a dark page 7 of the 38 fall below a 3:1 contrast ratio, where readable text
