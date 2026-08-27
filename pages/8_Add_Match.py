@@ -107,42 +107,75 @@ with st.form("match_form", clear_on_submit=False):
     all_rows = []
     for team in (TEAM_A, TEAM_B):
         st.subheader(team)
-        cols = st.columns(6)
+        team_existing = [existing_player_row(team, i) for i in range(6)]
+
+        def field_row(label, key_prefix, widget_fn):
+            """Render one field across all 6 slots as a single row, for horizontal tabbing."""
+            st.markdown(f"**{label}**")
+            cols = st.columns(6)
+            values = []
+            for i in range(6):
+                with cols[i]:
+                    values.append(widget_fn(i, cols[i]))
+            return values
+
+        players_sel = field_row("Player", "player", lambda i, c: st.selectbox(
+            "Player", player_names,
+            index=idx_of(player_names, team_existing[i]["player"] if team_existing[i] else None),
+            key=f"{team}_player_{i}", label_visibility="collapsed"))
+
+        heroes_sel = field_row("Hero", "hero", lambda i, c: st.selectbox(
+            "Hero", heroes,
+            index=idx_of(heroes, team_existing[i]["hero"] if team_existing[i] else None),
+            key=f"{team}_hero_{i}", label_visibility="collapsed"))
+
+        slots_sel = field_row("Draft Slot", "slot", lambda i, c: st.number_input(
+            "Draft Slot", min_value=1, max_value=12, step=1,
+            value=(team_existing[i]["draft_slot"] if team_existing[i] and team_existing[i].get("draft_slot") else
+                   (i + 1 if team == TEAM_A else i + 7)),
+            key=f"{team}_slot_{i}", label_visibility="collapsed"))
+
+        kills_sel = field_row("Kills", "k", lambda i, c: st.number_input(
+            "Kills", min_value=0, step=1,
+            value=team_existing[i]["kills"] if team_existing[i] else 0,
+            key=f"{team}_k_{i}", label_visibility="collapsed"))
+
+        deaths_sel = field_row("Deaths", "d", lambda i, c: st.number_input(
+            "Deaths", min_value=0, step=1,
+            value=team_existing[i]["deaths"] if team_existing[i] else 0,
+            key=f"{team}_d_{i}", label_visibility="collapsed"))
+
+        assists_sel = field_row("Assists", "a", lambda i, c: st.number_input(
+            "Assists", min_value=0, step=1,
+            value=team_existing[i]["assists"] if team_existing[i] else 0,
+            key=f"{team}_a_{i}", label_visibility="collapsed"))
+
+        souls_sel = field_row("Souls (k)", "souls", lambda i, c: st.number_input(
+            "Souls (k)", min_value=0.0, step=1.0,
+            value=float(team_existing[i]["souls_k"]) if team_existing[i] and team_existing[i].get("souls_k") is not None else 0.0,
+            key=f"{team}_souls_{i}", label_visibility="collapsed"))
+
+        plr_sel = field_row("Plyr Dmg (k)", "plr", lambda i, c: st.number_input(
+            "Plyr Dmg (k)", min_value=0.0, step=1.0,
+            value=float(team_existing[i]["plr_damage_k"]) if team_existing[i] and team_existing[i].get("plr_damage_k") is not None else 0.0,
+            key=f"{team}_plr_{i}", label_visibility="collapsed"))
+
+        obj_sel = field_row("Obj Dmg (k)", "obj", lambda i, c: st.number_input(
+            "Obj Dmg (k)", min_value=0.0, step=1.0,
+            value=float(team_existing[i]["obj_damage_k"]) if team_existing[i] and team_existing[i].get("obj_damage_k") is not None else 0.0,
+            key=f"{team}_obj_{i}", label_visibility="collapsed"))
+
+        heal_sel = field_row("Healing (k)", "heal", lambda i, c: st.number_input(
+            "Healing (k)", min_value=0.0, step=1.0,
+            value=float(team_existing[i]["healing_k"]) if team_existing[i] and team_existing[i].get("healing_k") is not None else 0.0,
+            key=f"{team}_heal_{i}", label_visibility="collapsed"))
+
         for i in range(6):
-            existing = existing_player_row(team, i)
-            with cols[i]:
-                st.markdown(f"**Slot {i+1}**")
-                p = st.selectbox("Player", player_names,
-                                  index=idx_of(player_names, existing["player"] if existing else None),
-                                  key=f"{team}_player_{i}")
-                h = st.selectbox("Hero", heroes,
-                                  index=idx_of(heroes, existing["hero"] if existing else None),
-                                  key=f"{team}_hero_{i}")
-                default_slot = (existing["draft_slot"] if existing and existing.get("draft_slot") else
-                                (i + 1 if team == TEAM_A else i + 7))
-                slot = st.number_input("Draft Slot", min_value=1, max_value=12, step=1,
-                                        value=default_slot, key=f"{team}_slot_{i}")
-                k = st.number_input("Kills", min_value=0, step=1,
-                                     value=existing["kills"] if existing else 0, key=f"{team}_k_{i}")
-                d = st.number_input("Deaths", min_value=0, step=1,
-                                     value=existing["deaths"] if existing else 0, key=f"{team}_d_{i}")
-                a = st.number_input("Assists", min_value=0, step=1,
-                                     value=existing["assists"] if existing else 0, key=f"{team}_a_{i}")
-                souls = st.number_input("Souls (k)", min_value=0.0, step=1.0,
-                                         value=float(existing["souls_k"]) if existing and existing.get("souls_k") is not None else 0.0,
-                                         key=f"{team}_souls_{i}")
-                plr = st.number_input("Plyr Dmg (k)", min_value=0.0, step=1.0,
-                                       value=float(existing["plr_damage_k"]) if existing and existing.get("plr_damage_k") is not None else 0.0,
-                                       key=f"{team}_plr_{i}")
-                obj = st.number_input("Obj Dmg (k)", min_value=0.0, step=1.0,
-                                       value=float(existing["obj_damage_k"]) if existing and existing.get("obj_damage_k") is not None else 0.0,
-                                       key=f"{team}_obj_{i}")
-                heal = st.number_input("Healing (k)", min_value=0.0, step=1.0,
-                                        value=float(existing["healing_k"]) if existing and existing.get("healing_k") is not None else 0.0,
-                                        key=f"{team}_heal_{i}")
-                all_rows.append({"team": team, "player": p, "hero": h, "kills": k, "deaths": d,
-                                  "assists": a, "souls_k": souls, "plr_damage_k": plr,
-                                  "obj_damage_k": obj, "healing_k": heal, "draft_slot": slot})
+            all_rows.append({"team": team, "player": players_sel[i], "hero": heroes_sel[i],
+                              "kills": kills_sel[i], "deaths": deaths_sel[i], "assists": assists_sel[i],
+                              "souls_k": souls_sel[i], "plr_damage_k": plr_sel[i],
+                              "obj_damage_k": obj_sel[i], "healing_k": heal_sel[i],
+                              "draft_slot": slots_sel[i]})
 
     st.divider()
     c1, c2 = st.columns(2)
