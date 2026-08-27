@@ -15,9 +15,9 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 - [x] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
       All 82 imported matches have slots 1–12; every match added since loses it. One form
       field to stop the bleed. **S**
-- [ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
+- ~~[ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
       the data-entry cost and show none of it. Add to player detail + hero tables as
-      per-minute rates, alongside the souls/obj-damage rates that already exist. **S**
+      per-minute rates, alongside the souls/obj-damage rates that already exist. **S**~~
 
 ## Tier 1 — Surface what we already have
 
