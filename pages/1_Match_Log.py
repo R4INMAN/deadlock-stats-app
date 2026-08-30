@@ -33,7 +33,7 @@ msum = msum[msum["match_id"].isin(filtered_ids)]
 st.caption(f"{len(msum)} match(es)")
 st.dataframe(
     ui.match_summary_display(msum),
-    use_container_width=True, hide_index=True,
+    width='stretch', hide_index=True,
     column_config=ui.MATCH_SUMMARY_COLUMNS,
 )
 
@@ -66,7 +66,7 @@ if match_ids:
             })
         # The side header already says who won, so a per-row Win column would repeat it 6 times.
         st.dataframe(
-            display_rows, use_container_width=True, hide_index=True,
+            display_rows, width='stretch', hide_index=True,
             column_config={
                 "": st.column_config.ImageColumn("", width="small"),
                 "MVP": st.column_config.ImageColumn("MVP", width="small"),

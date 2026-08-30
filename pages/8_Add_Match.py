@@ -32,7 +32,7 @@ if mode == "Delete Match":
     winners = [p["team"] for p in match["players"] if p["win"]]
     st.write(f"**Winner:** {winners[0] if winners else 'n/a'}")
     st.dataframe([{"Player": p["player"], "Hero": p["hero"], "Team": p["team"]} for p in match["players"]],
-                 use_container_width=True, hide_index=True)
+                 width='stretch', hide_index=True)
 
     confirm = st.checkbox(f"I'm sure I want to permanently delete match {chosen_id}")
     if st.button("Delete match", disabled=not confirm, type="primary"):

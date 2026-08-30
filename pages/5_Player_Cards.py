@@ -125,7 +125,7 @@ with left:
     hb["avg_kp_pct"] = hb["avg_kp_pct"].round(1)
     st.dataframe(
         hb[["hero", "games", "wins", "win_rate", "avg_kp_pct", "mvp_count"]],
-        use_container_width=True, hide_index=True,
+        width='stretch', hide_index=True,
     )
 
 with right:
@@ -138,7 +138,7 @@ with right:
                 "record": f"{r['wins']}–{r['losses']}",
                 "win_rate": round(r["win_rate"] * 100, 1),
             } for r in mates],
-            use_container_width=True, hide_index=True,
+            width='stretch', hide_index=True,
         )
         st.caption("Minimum 5 games together. See **Chemistry** for how much of this is real.")
     else:

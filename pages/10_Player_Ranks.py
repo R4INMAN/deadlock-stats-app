@@ -37,13 +37,13 @@ for p in sorted(players.keys()):
     r = data_io.current_rank(p, ranks)
     if r:
         current.append({"player": p, "current_rank": r})
-st.dataframe(current, use_container_width=True, hide_index=True)
+st.dataframe(current, width='stretch', hide_index=True)
 
 st.divider()
 st.subheader("Rank history")
 player_pick = st.selectbox("View history for", ["All"] + sorted(players.keys()))
 history = ranks if player_pick == "All" else [r for r in ranks if r["player"] == player_pick]
 history = sorted(history, key=lambda r: (r["player"], r["date"]))
-st.dataframe(history, use_container_width=True, hide_index=True)
+st.dataframe(history, width='stretch', hide_index=True)
 
 ui.brand_footer()

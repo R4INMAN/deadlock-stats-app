@@ -27,7 +27,7 @@ display["hero_portrait"] = ui.hero_portrait_column(display["most_played_hero"])
 st.dataframe(
     display[["hero_portrait", "player", "games", "win_rate", "hero_variety", "most_played_hero",
               "avg_kp_pct", "avg_souls_per_min", "mvp_count", "key_player_count", "award_rate"]],
-    use_container_width=True, hide_index=True,
+    width='stretch', hide_index=True,
     column_config={
         "hero_portrait": st.column_config.ImageColumn("", width="small",
                                                        help="Most played hero"),
@@ -89,7 +89,7 @@ else:
     side_display = detail["side_breakdown"].copy()
     side_display["win_rate"] = (side_display["win_rate"] * 100).round(1)
     st.dataframe(
-        side_display, use_container_width=True, hide_index=True,
+        side_display, width='stretch', hide_index=True,
         column_config={
             "team": st.column_config.TextColumn("Side"),
             "games": st.column_config.NumberColumn("Games"),
@@ -106,7 +106,7 @@ else:
     st.dataframe(
         hero_display[["portrait", "hero", "games", "wins", "win_rate", "avg_kp_pct",
                        "mvp_count", "key_player_count"]],
-        use_container_width=True, hide_index=True,
+        width='stretch', hide_index=True,
         column_config={
             "portrait": st.column_config.ImageColumn("", width="small"),
             "hero": st.column_config.TextColumn("Hero"),
@@ -169,6 +169,6 @@ else:
             labelColor=theme.color("base_text"), titleColor=theme.color("base_text"),
         )
 
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width='stretch')
 
 ui.brand_footer()

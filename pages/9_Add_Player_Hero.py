@@ -31,7 +31,7 @@ with col1:
                     st.rerun()
 
     st.markdown(f"**Current players ({len(players)}):**")
-    st.dataframe(sorted(players.keys()), use_container_width=True, hide_index=True)
+    st.dataframe(sorted(players.keys()), width='stretch', hide_index=True)
 
 with col2:
     st.subheader("Add a hero")
@@ -49,6 +49,6 @@ with col2:
                     st.rerun()
 
     st.markdown(f"**Current heroes ({len(heroes)}):**")
-    st.dataframe(sorted(heroes), use_container_width=True, hide_index=True)
+    st.dataframe(sorted(heroes), width='stretch', hide_index=True)
 
 ui.brand_footer()

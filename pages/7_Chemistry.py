@@ -164,9 +164,9 @@ table = pd.DataFrame([{
 
 top, bottom = st.tabs([f"Best {min(15, len(table))}", f"Worst {min(15, len(table))}"])
 with top:
-    st.dataframe(table.head(15), use_container_width=True, hide_index=True)
+    st.dataframe(table.head(15), width='stretch', hide_index=True)
 with bottom:
-    st.dataframe(table.tail(15).iloc[::-1], use_container_width=True, hide_index=True)
+    st.dataframe(table.tail(15).iloc[::-1], width='stretch', hide_index=True)
 
 n_sig = sum(1 for r in rows if r["p_value"] < 0.05)
 expected_by_chance = 0.05 * len(rows)
@@ -219,7 +219,7 @@ fig.update_layout(
     font=dict(color=INK), xaxis=dict(gridcolor="#2E2C27", zeroline=False),
     yaxis=dict(gridcolor="rgba(0,0,0,0)"),
 )
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 st.caption(
     "Each bar is a 95% interval on the synergy, filled dots are the pairs that clear p < 0.05. "
     "Bars crossing the dashed line are consistent with the pair being exactly the sum of its "
@@ -257,7 +257,7 @@ scatter.update_layout(
     yaxis=dict(title="actual win rate together (%)", range=[0, 100], gridcolor="#2E2C27"),
     plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)", font=dict(color=INK),
 )
-st.plotly_chart(scatter, use_container_width=True)
+st.plotly_chart(scatter, width='stretch')
 
 baseline_spread = max(r["expected"] for r in rows) - min(r["expected"] for r in rows)
 st.caption(
@@ -289,7 +289,7 @@ if mine:
             "teammate apart from you": (f"{r['teammate_apart_rate']:.0%}"
                                         if r["teammate_apart_rate"] is not None else "—"),
         } for r in mine]),
-        use_container_width=True, hide_index=True,
+        width='stretch', hide_index=True,
     )
     st.caption("Sorted by synergy, so a teammate does not top the list merely for being good.")
 else:
