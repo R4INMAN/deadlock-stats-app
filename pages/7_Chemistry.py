@@ -66,7 +66,7 @@ rows = synergy_rows(len(matches), min_games, mode)
 spread_test, cohesion, calibration = run_tests(len(matches), min_games)
 
 # ---------------------------------------------------------------- verdict
-st.subheader("Is it real?")
+st.subheader("Chat, is this real?")
 cards = st.columns(3)
 
 with cards[0]:
