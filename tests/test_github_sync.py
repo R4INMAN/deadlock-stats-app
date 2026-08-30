@@ -442,6 +442,37 @@ def test_an_outage_does_not_refetch_on_every_render():
     assert dio.storage_status()[0] == "remote", dio.storage_status()
 
 
+def test_save_matches_refuses_when_it_would_miss_the_live_store():
+    """A maintenance script writing the fallback copy must fail, not report success.
+
+    backfill_match_dates.py calls save_matches. With secrets present it would write the local
+    seed, print "Filled 35", and the app would never see any of it - the same shape of silent
+    failure that lost the three matches.
+    """
+    import utils.github_sync as gs
+    import utils.data_io as dio
+    server = FakeGitHub(files={"data/matches.json": []})
+    install(gs, server)
+
+    try:
+        dio.save_matches([{"match_id": "1"}])
+    except RuntimeError as exc:
+        assert "would not reach the app" in str(exc), exc
+    else:
+        raise AssertionError("save_matches must refuse while sync is configured")
+
+    # Unconfigured, it is the right tool and still works.
+    install(gs, server, FakeSecrets())
+    import tempfile, os as _os, json as _json
+    tmp = _os.path.join(tempfile.mkdtemp(), "matches.json")
+    saved, dio.MATCHES_FILE = dio.MATCHES_FILE, tmp
+    try:
+        dio.save_matches([{"match_id": "1"}])
+        assert _json.load(open(tmp)) == [{"match_id": "1"}]
+    finally:
+        dio.MATCHES_FILE = saved
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failures = 0

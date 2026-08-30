@@ -204,11 +204,24 @@ def hero_portrait_path(portrait_name):
 def save_matches(matches):
     """Overwrite matches.json on the local disk. Offline maintenance scripts only.
 
-    This is the whole-file write that the app deliberately no longer does - it cannot detect a
-    concurrent edit, so running it against live data would silently drop whatever landed while
-    the script was working. `backfill_match_dates.py` uses it correctly: offline, against a
-    checkout, with the result reviewed and committed by hand.
+    This is the whole-file write the app deliberately no longer does: it cannot detect a
+    concurrent edit, so against live data it would drop whatever landed while the script was
+    working. `backfill_match_dates.py` uses it correctly - offline, against a checkout, with the
+    result reviewed and committed by hand.
+
+    It refuses to run when sync is configured rather than quietly writing the local fallback,
+    because that failure looks exactly like success: the script prints "Filled 35" and the app
+    never sees any of it. Unset the secrets to work on a checkout, or write through
+    `add_match` / `update_match` so the edit reaches the data branch.
     """
+    if github_sync.configured():
+        raise RuntimeError(
+            f"save_matches() writes the local fallback copy, but this checkout is configured to "
+            f"sync with {github_sync.target()} - so the change would not reach the app and the "
+            f"script would report success anyway. Either move .streamlit/secrets.toml aside to "
+            f"work against local files, or use add_match()/update_match(), which write through "
+            f"to the data branch."
+        )
     _save_local(MATCHES_FILE, matches)
 
 
