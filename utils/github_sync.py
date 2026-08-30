@@ -9,10 +9,11 @@ on 8/27.
 So writes go to the repo itself. Three design points are worth stating, because two of them
 were got wrong on the first attempt:
 
-**Writes target their own branch.** Pushing to the branch Streamlit deploys from triggers a
-redeploy, so saving a match would reboot the app underneath whoever was using it. The
-`github_branch` secret points at a data-only branch that nothing deploys from, which is why
-the branch is configuration rather than a constant.
+**Writes target their own branch, and default to it.** Pushing to the branch Streamlit deploys
+from triggers a redeploy, so saving a match would reboot the app underneath whoever was using
+it. Writes go to `DEFAULT_BRANCH` unless `github_branch` overrides it - the default lives here
+rather than in a dashboard so that the repo explains the app's behaviour, and so a wiped or
+forgotten secret degrades to the safe option instead of the dangerous one.
 
 **Writes are operations, not file overwrites.** `mutate` re-reads the file immediately before
 writing and re-applies the caller's change to *that* copy, then PUTs conditionally on the blob
@@ -35,6 +36,17 @@ import streamlit as st
 
 API_ROOT = "https://api.github.com"
 TIMEOUT = 15
+
+# Where writes go when secrets don't say. This is deliberately NOT the deployed branch: an
+# app that falls back to writing the branch it is served from reboots itself on every save,
+# and that default would be invisible in the repo - somebody would have to know a dashboard
+# setting existed to predict the app's behaviour. Defaulting here instead means the code is
+# the source of truth and a missing or wiped secret degrades to the safe option.
+DEFAULT_BRANCH = "data"
+
+# Branch names that are somebody's deployment. Writing to one is legal but nearly always a
+# mistake, so the app says so loudly and the setup script refuses outright.
+DEPLOY_BRANCH_NAMES = frozenset({"main", "master"})
 
 # One writer at a time within this process. Streamlit serves every viewer from a single
 # container, so without this two people hitting Save together would race between the read and
@@ -61,7 +73,7 @@ def _config():
     try:
         token = st.secrets["github_token"]
         repo = st.secrets["github_repo"]
-        branch = st.secrets.get("github_branch", "main")
+        branch = st.secrets.get("github_branch", DEFAULT_BRANCH)
     except Exception:
         return None
     if not token or not repo:
@@ -80,6 +92,17 @@ def target():
         return None
     _, repo, branch = cfg
     return f"{repo}@{branch}"
+
+
+def writes_to_deploy_branch():
+    """True when saves would push to the branch the app is served from.
+
+    Streamlit Cloud redeploys on any push to the deployed branch, so this configuration makes
+    every logged match reboot the app under whoever is using it - and rewrites the code the
+    running container was built from while it is running.
+    """
+    cfg = _config()
+    return bool(cfg) and cfg[2] in DEPLOY_BRANCH_NAMES
 
 
 def _headers(token):

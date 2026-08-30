@@ -43,10 +43,13 @@ def main():
 
     target = github_sync.target()
     print(f"   ok    Writing to {target}")
-    if target.endswith("@main"):
-        print("   WARN  github_branch is 'main', the branch Streamlit deploys from.")
-        print("         Every save will push to it and trigger a redeploy, rebooting the app")
-        print("         under whoever is using it. Set github_branch = \"data\".")
+    if github_sync.writes_to_deploy_branch():
+        print("   FAIL  github_branch points at a deployed branch.")
+        print("         Pushing there triggers a Streamlit Cloud redeploy, so every saved match")
+        print("         would reboot the app under whoever is using it. This check refuses to")
+        print(f"         write there. Unset github_branch to use the default")
+        print(f"         ('{github_sync.DEFAULT_BRANCH}'), or name a non-deployed branch.")
+        return 1
 
     print("\n2. Reading")
     try:

@@ -9,7 +9,9 @@ Plain asserts and a main(), so this runs with `python tests/test_github_sync.py`
 keeps its three-line requirements.txt.
 """
 import base64
+import contextlib
 import copy
+import io
 import json
 import os
 import sys
@@ -246,6 +248,59 @@ def test_gives_up_loudly_under_sustained_contention():
     stored = [m["match_id"] for m in server.contents("data/matches.json")]
     assert "mine" not in stored, f"a failed write must not appear: {stored}"
     assert server.commits == [], server.commits
+
+
+def test_branch_defaults_away_from_the_deployed_one():
+    """A missing github_branch must not fall back to the branch the app is served from.
+
+    This is the setting that made a heartbeat commit land on main and reboot the app on
+    8/30. Defaulting in code rather than in a dashboard means the repo predicts the app's
+    behaviour, and a wiped secret degrades to the safe option.
+    """
+    import utils.github_sync as gs
+    server = FakeGitHub()
+    install(gs, server, FakeSecrets(github_token="good-token", github_repo="owner/repo"))
+
+    assert gs.target() == f"owner/repo@{gs.DEFAULT_BRANCH}", gs.target()
+    assert gs.DEFAULT_BRANCH not in gs.DEPLOY_BRANCH_NAMES
+    assert gs.writes_to_deploy_branch() is False
+
+
+def test_deploy_branch_is_detected():
+    import utils.github_sync as gs
+    server = FakeGitHub(branches=("main", "master", "data"))
+
+    for branch in ("main", "master"):
+        install(gs, server, FakeSecrets(
+            github_token="good-token", github_repo="owner/repo", github_branch=branch,
+        ))
+        assert gs.writes_to_deploy_branch() is True, branch
+
+    install(gs, server, FakeSecrets(
+        github_token="good-token", github_repo="owner/repo", github_branch="data",
+    ))
+    assert gs.writes_to_deploy_branch() is False
+
+
+def test_check_sync_refuses_to_write_to_a_deploy_branch():
+    """The setup script must stop, not warn - a warning already failed to prevent this once."""
+    import utils.github_sync as gs
+    import scripts.check_sync as cs
+    server = FakeGitHub(files={"data/matches.json": []}, branches=("main",))
+    install(gs, server, FakeSecrets(
+        github_token="good-token", github_repo="owner/repo", github_branch="main",
+    ))
+
+    saved_argv = sys.argv
+    sys.argv = ["check_sync.py", "--write"]
+    try:
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            exit_code = cs.main()
+        assert exit_code == 1, "should exit non-zero"
+        assert "refuses to" in out.getvalue(), out.getvalue()
+    finally:
+        sys.argv = saved_argv
+    assert server.commits == [], f"refused check still wrote: {server.commits}"
 
 
 def test_parallel_saves_all_land():

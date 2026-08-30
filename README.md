@@ -51,15 +51,21 @@ time. Refresh it from there when the gap starts to matter.
 
 ### Configuring it
 
-Four keys, in `.streamlit/secrets.toml` locally (gitignored) and in **share.streamlit.io -> your
+Three keys, in `.streamlit/secrets.toml` locally (gitignored) and in **share.streamlit.io -> your
 app -> Settings -> Secrets** when hosted:
 
 ```toml
 edit_password = "..."                            # gates the edit pages
 github_token  = "github_pat_..."                 # fine-grained PAT, Contents: Read and write
 github_repo   = "R4INMAN/deadlock-stats-app"
-github_branch = "data"                           # NOT main - see above
 ```
+
+There is deliberately no `github_branch` key. It defaults to `data` in
+`github_sync.DEFAULT_BRANCH`, so the branch the app writes to is answerable from the repo rather
+than from a dashboard nobody can see in a diff - and a wiped or forgotten secret degrades to the
+safe branch instead of the deployed one. Override it only if you have a reason to, and never to
+`main` or `master`: the edit pages show a warning when it points at a deployed branch, and
+`check_sync.py --write` refuses to run at all.
 
 With no token the app falls back to reading and writing `data/*.json` directly, so
 `streamlit run Home.py` works offline with no credentials. The edit pages say which mode they

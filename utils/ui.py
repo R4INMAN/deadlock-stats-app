@@ -246,8 +246,17 @@ def storage_notice():
     like success, so "which store am I writing to" has to be visible before someone spends
     ten minutes typing a match into it.
     """
+    from utils import github_sync
+
     mode, detail = data_io.storage_status()
-    if mode == "remote":
+    if mode == "remote" and github_sync.writes_to_deploy_branch():
+        st.warning(
+            f"**Saving here redeploys the app.** Edits are committed to `{detail}`, which is a "
+            f"deployed branch - every save reboots the app under everyone using it, and can "
+            f"interrupt a match you are halfway through typing. Point `github_branch` at a "
+            f"data-only branch."
+        )
+    elif mode == "remote":
         st.caption(f"Edits are committed to `{detail}`.")
     elif mode == "local":
         st.caption(
