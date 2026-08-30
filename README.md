@@ -9,8 +9,9 @@ streamlit run Home.py
 ```
 
 ## Structure
-- `data/*.json` — your data (matches, players, heroes, rank history). Edit by hand or through the app.
-- `utils/data_io.py` — load/save helpers
+- `data/*.json` — the seed and offline fallback for your data (matches, players, heroes, rank history). The live copy the hosted app reads and writes lives on the `data` branch; see **Where the data lives**.
+- `utils/data_io.py` — load/save helpers, routing writes to the data branch or to local files
+- `utils/github_sync.py` — the conditional-write path against the GitHub contents API
 - `utils/stats.py` — all win rate / ban rate / pick rate / MVP calculations, computed live from matches.json
 - `pages/` — the 10 pages, browsing first and the three that write to `data/` last:
   Match Log, Player, Hero Summary, Leaderboard, Player Cards, Head to Head, Friendship Buff,
@@ -21,9 +22,64 @@ streamlit run Home.py
 - `assets/` + `data/palette.json`, `data/hero_visuals.json` — art and colors vendored from the Deadlock assets API
 - `.streamlit/config.toml` — the app theme, using the game's own colors
 - `fetch_deadlock_assets.py` — re-run to refresh vendored art and colors when Valve adds or reworks heroes
+- `scripts/check_sync.py` — verify the app can read and write its data store
+- `tests/` — two plain scripts, no runner to install; see **Tests**
 - `convert_csv.py` — the one-time import script that built data/*.json from your old Google Sheet CSVs (kept for reference, not needed to run the app)
 
 Your 82 historical matches, 83 players, and 38 heroes are already imported.
+
+## Where the data lives
+
+The app writes to the repo, not to its own disk. Streamlit Cloud builds a container by cloning
+the repo and throws it away on every restart, redeploy and sleep, so anything saved to the local
+filesystem reverts to the committed copy the moment the container dies - which is exactly how
+three logged matches were lost on 8/27.
+
+Saves go through the GitHub contents API to the **`data` branch**, which nothing deploys from.
+That separation matters: pushing to the deployed branch triggers a redeploy, so logging a match
+would otherwise reboot the app underneath whoever was using it.
+
+Writes are operations rather than file overwrites. `data_io` hands `github_sync` a function of
+the file's current contents; sync re-reads immediately before writing and replays that function
+against the fresh copy, then PUTs conditionally on the blob sha it just read. If someone else
+saved in between, the precondition fails and the cycle runs again - so two people adding
+different matches at the same moment both land.
+
+`main` keeps its own copy of `data/*.json`. That is the seed for local development and the
+fallback the app renders if GitHub is unreachable, so it drifts behind the `data` branch over
+time. Refresh it from there when the gap starts to matter.
+
+### Configuring it
+
+Four keys, in `.streamlit/secrets.toml` locally (gitignored) and in **share.streamlit.io -> your
+app -> Settings -> Secrets** when hosted:
+
+```toml
+edit_password = "..."                            # gates the edit pages
+github_token  = "github_pat_..."                 # fine-grained PAT, Contents: Read and write
+github_repo   = "R4INMAN/deadlock-stats-app"
+github_branch = "data"                           # NOT main - see above
+```
+
+With no token the app falls back to reading and writing `data/*.json` directly, so
+`streamlit run Home.py` works offline with no credentials. The edit pages say which mode they
+are in before you type a match into them.
+
+Check the setup end to end:
+
+```
+python scripts/check_sync.py           # can it read?
+python scripts/check_sync.py --write   # can it write?
+```
+
+## Tests
+
+No test runner to install - both are plain scripts:
+
+```
+python tests/test_github_sync.py    # the conditional-write path, against a fake contents API
+python tests/test_pages_render.py   # every page renders without raising, against real data
+```
 
 ## Art and theming
 

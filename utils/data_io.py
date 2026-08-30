@@ -164,13 +164,17 @@ def load_ranks():
     return _load(RANKS_FILE, [])
 
 
+# The two below are vendored assets rather than user data: they are refreshed by
+# `fetch_deadlock_assets.py`, versioned alongside the code that reads them, and never written
+# by the app. Reading them locally keeps them in step with the deployed release, and saves two
+# API round trips on every cold container.
 def load_rank_tiers():
-    return _load(RANK_TIERS_FILE, [])
+    return _load_local(RANK_TIERS_FILE, [])
 
 
 def load_hero_visuals():
     """Per-hero official color + icon filenames, vendored by fetch_deadlock_assets.py."""
-    return _load(HERO_VISUALS_FILE, {})
+    return _load_local(HERO_VISUALS_FILE, {})
 
 
 def hero_portrait_path(portrait_name):

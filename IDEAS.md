@@ -9,37 +9,49 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 0 — Bugs and papercuts
 
-- [ ] **JSON edits still don't survive a restart.** *(reported 8/27; cost us 3 logged matches)*
-      `utils/github_sync.py` has the two halves of the fix — `pull_file` and `push_file` against
-      the contents API, reading the token and repo out of Streamlit secrets — but **nothing calls
-      either one**. `_save` still writes only to the local filesystem (`utils/data_io.py:24`), and
-      Streamlit Cloud's disk is ephemeral and rebuilt from the repo on every restart or redeploy,
-      so a match added through the app lives until that container dies and then reverts to the
-      committed copy. Wiring `push_file` into the `save_*` functions is the remaining work. Two
-      details to get right while doing it: `push_file` is a read-sha-then-PUT, so two people
-      saving at once means last writer wins unless the save re-reads first; and a fresh container
-      should `pull_file` on load rather than trusting whatever is baked into the image.
-      Also worth cleaning up: `data/*.json` is in `.gitignore` but all seven files are still
-      tracked, so the ignore does nothing — `.gitignore` only applies to untracked files.
-      Untracking them instead would leave a fresh container with no data at all, which is why
-      they came back in "Restoring Match Data". **M, and first — it blocks data entry.**
+- [x] **JSON edits didn't survive a restart.** *(done - `utils/github_sync.py`, wired through
+      `utils/data_io.py`)* Saves now go to the repo via the contents API, on the `data` branch
+      rather than the deployed one - pushing to the branch Streamlit deploys from triggers a
+      redeploy, so logging a match used to reboot the app under whoever was using it. Writes are
+      operations rather than file overwrites: `data_io` hands sync a function of the file's
+      current contents, sync re-reads immediately before writing and replays it against the fresh
+      copy, then PUTs conditionally on the blob sha, so two people saving at once both land. The
+      quieter half of the bug is also fixed - the old path returned a bare `False` nobody checked
+      and printed "Match saved!" over writes that never left the machine, which is why the loss
+      went a week unnoticed. `data/*.json` is out of `.gitignore`, where it did nothing but
+      invite another attempt at untracking. Setup and checks in the README.
+
 - [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `100905275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
 - [x] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
       All 82 imported matches have slots 1–12; every match added since loses it. One form
       field to stop the bleed. **S**
-- [ ] ~~**`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
-      the data-entry cost and show none of it. Add to player detail + hero tables as
-      per-minute rates, alongside the souls/obj-damage rates that already exist. **S**~~
+- [ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay the
+      data-entry cost and show none of it. Add to player detail + hero tables as per-minute
+      rates, alongside the souls/obj-damage rates that already exist. Struck through in `2228113`
+      as done, but neither field appears anywhere in the code - still open. Healing is non-zero in
+      972 of 984 player-games (median 11k), so it reads as a real stat for everyone rather than a
+      supports-only column. **S**
+
 - [x] **Tab moved down a column instead of across the row.** *(done — `field_row` in
       `pages/8_Add_Match.py` renders each field across all six slots)* Entry now runs
       player-by-player across a row instead of down one player's ten fields. **S**
-- [ ] **Draft slot defaults are the wrong six numbers.** The field now defaults to 1–6 for Hidden
-      King and 7–12 for Archmother (`pages/8_Add_Match.py:132`), but the sides don't draft in
-      blocks: Hidden King is always 1, 4, 5, 8, 9, 12 and Archmother always 2, 3, 6, 7, 10, 11.
-      Two literals. Slots stay editable per row either way, since heroes get typed in whatever
-      order the post-game summary lists them, not in draft order. **S**
+- [ ] **`draft_slot` records a row index, not a draft order - and always has.** The plan was to
+      change the defaults from 1-6/7-12 to Hidden King's 1, 4, 5, 8, 9, 12 and Archmother's
+      2, 3, 6, 7, 10, 11. Two literals. But the 82 imported matches do not contain draft order at
+      all: every match has Hidden King on 1-6 and Archmother on 7-12, and the six first-pick
+      heroes per match land on within-team row 1 in 48 of 82 matches and row 6 in 45 - flat,
+      where real pick order would cluster hard at the low rows. The source column in
+      `convert_csv.py:48` is headed `"Draft Slot (for stats, ignore)"`, which is the sheet
+      telling us the same thing.
+
+      So this is not a two-literal fix. Writing real order into the same field mixes it with 82
+      matches of noise, and every future slot-based stat silently averages the two. The decision
+      taken is to **backfill real draft order from statlocker first**, then capture it going
+      forward - which also settles the early-picks question below, since `first_picks` only stays
+      necessary while the slots are junk. Needs a source for 82 drafts before it can start. **M**
+
 - [ ] **A new player mid-entry throws away the whole form.** Fill out one team, discover somebody
       on the other side isn't in `players.json`, and the only fix is Add Player / Hero on another
       page — which loses everything typed. Either preserve the form across the round trip (it's
@@ -51,10 +63,11 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
       → back to the draft sheet. Group everything that comes off the draft screen (slots, bans,
       first picks) into one block and everything off the summary into another, so each image gets
       opened once. **S**
-- [ ] **Are early picks redundant now?** `first_picks` is still labelled "draft order not tracked"
-      even though `draft_slot` is captured for every new match, which makes it derivable. Keep the
-      field so the existing 82 matches' stats still compute, or backfill and retire it — worth an
-      explicit decision rather than carrying both forever. **S**
+- [ ] **Are early picks redundant now?** Not yet, and not for the reason the label implies.
+      `first_picks` is still marked "draft order not tracked" and is *not* derivable from
+      `draft_slot`, because the stored slots carry no order (above). Until the backfill lands it
+      is the only draft-order signal the 82 matches have, so it stays. Revisit once slots are
+      real. **S**
 
 ## Tier 1 — Surface what we already have
 
