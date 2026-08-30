@@ -8,6 +8,7 @@ if not require_edit_access():
     
 st.set_page_config(page_title="Player Ranks", page_icon="assets/ui/puddle_punch.png", layout="wide")
 ui.page_header("Player Ranks", "Reported ranks over time.")
+ui.storage_notice()
 
 players = data_io.load_players()
 ranks = data_io.load_ranks()
@@ -25,9 +26,9 @@ with st.form("add_rank_form", clear_on_submit=True):
     entry_date = c3.date_input("Date", value=datetime.date.today())
     submitted = st.form_submit_button("Log rank")
     if submitted:
-        data_io.add_rank_entry(player, rank, str(entry_date))
-        st.success(f"Logged {player} as {rank} on {entry_date}.")
-        st.rerun()
+        if ui.report_save(lambda: data_io.add_rank_entry(player, rank, str(entry_date)),
+                          f"Logged {player} as {rank} on {entry_date}."):
+            st.rerun()
 
 st.divider()
 st.subheader("Current ranks")
