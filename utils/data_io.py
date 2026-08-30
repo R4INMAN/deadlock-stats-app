@@ -34,9 +34,15 @@ HERO_VISUALS_FILE = os.path.join(DATA_DIR, "hero_visuals.json")
 
 CACHE_TTL_SECONDS = 300
 
+# How long a failed remote read is remembered before trying again. Without it an outage costs a
+# fresh request per file per script re-run - and Streamlit re-runs the whole script on every
+# click, across four files, at a 15s timeout each, so a page would hang for a minute instead of
+# rendering. Short enough that recovery is quick, long enough that the app stays usable.
+FAILURE_TTL_SECONDS = 30
+
 _cache = {}
+_stale = {}
 _cache_lock = threading.Lock()
-_last_load_error = None
 
 
 # ---------------------------------------------------------------- storage plumbing
@@ -62,12 +68,11 @@ def _load(path, default):
     """Current contents, from the data branch when configured, else from disk.
 
     If the remote read fails on a configured app the committed copy is served instead, so a
-    GitHub outage degrades the app to stale-but-readable rather than blank. `last_load_error`
-    exposes that state for the UI to say so out loud - silently showing stale data is how you
-    get someone re-entering a match that already exists.
+    GitHub outage degrades the app to stale-but-readable rather than blank. The failure is
+    recorded per file rather than in one global: a page loads four of these, and a later success
+    on `players.json` must not clear the warning that `matches.json` is stale - silently showing
+    stale data is how you get someone re-entering a match that already exists.
     """
-    global _last_load_error
-
     if not github_sync.configured():
         return _load_local(path, default)
 
@@ -76,16 +81,20 @@ def _load(path, default):
         cached = _cache.get(path)
         if cached and now - cached[1] < CACHE_TTL_SECONDS:
             return copy.deepcopy(cached[0])
+        failed = _stale.get(path)
+        if failed and now - failed[1] < FAILURE_TTL_SECONDS:
+            return _load_local(path, default)
 
     try:
         data, _ = github_sync.read_json(_repo_path(path), default)
     except github_sync.SyncError as exc:
-        _last_load_error = str(exc)
+        with _cache_lock:
+            _stale[path] = (str(exc), now)
         return _load_local(path, default)
 
-    _last_load_error = None
     with _cache_lock:
         _cache[path] = (data, now)
+        _stale.pop(path, None)
     return copy.deepcopy(data)
 
 
@@ -109,22 +118,29 @@ def _mutate(path, op, message, default):
 
 
 def last_load_error():
-    """Why the most recent remote read fell back to the committed copy, or None."""
-    return _last_load_error
+    """Which files are being served stale and why, or None if everything is live."""
+    with _cache_lock:
+        if not _stale:
+            return None
+        names = ", ".join(sorted(os.path.basename(p) for p in _stale))
+        newest_reason = max(_stale.values(), key=lambda v: v[1])[0]
+        return f"{names} - {newest_reason}"
 
 
 def storage_status():
     """(mode, detail) for the UI: how this app is storing data right now."""
     if not github_sync.configured():
         return "local", f"Local files under {DATA_DIR}"
-    if _last_load_error:
-        return "degraded", _last_load_error
+    error = last_load_error()
+    if error:
+        return "degraded", error
     return "remote", github_sync.target()
 
 
 def invalidate_cache():
     with _cache_lock:
         _cache.clear()
+        _stale.clear()
 
 
 # ---------------------------------------------------------------- reads

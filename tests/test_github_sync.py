@@ -378,6 +378,70 @@ def test_data_io_rejects_duplicate_match_id():
         raise AssertionError("a duplicate match id must be rejected against fresh data")
 
 
+def test_one_stale_file_is_not_cleared_by_another_succeeding():
+    """A page loads four files. One failing must keep warning after the others succeed."""
+    import utils.github_sync as gs
+    import utils.data_io as dio
+    server = FakeGitHub(files={
+        "data/matches.json": [{"match_id": "1"}],
+        "data/players.json": {"Zack": {}},
+    })
+    install(gs, server)
+    dio.invalidate_cache()
+
+    # matches.json is unreadable; players.json is fine.
+    real_request = server.request
+
+    def only_matches_fails(method, url, **kw):
+        if "matches.json" in url and method == "GET":
+            return FakeResponse(500, {"message": "boom"})
+        return real_request(method, url, **kw)
+
+    gs.requests = type("R", (), {"request": staticmethod(only_matches_fails),
+                                 "RequestException": Exception})
+
+    dio.load_matches()
+    assert dio.storage_status()[0] == "degraded", dio.storage_status()
+
+    dio.load_players()  # succeeds - must NOT clear the matches warning
+    mode, detail = dio.storage_status()
+    assert mode == "degraded", f"a success wiped the stale warning: {mode} {detail}"
+    assert "matches.json" in detail, detail
+    assert "players.json" not in detail, detail
+
+
+def test_an_outage_does_not_refetch_on_every_render():
+    """Negative caching: four files x a re-run per click x a 15s timeout would hang a page."""
+    import utils.github_sync as gs
+    import utils.data_io as dio
+    server = FakeGitHub(files={"data/matches.json": [{"match_id": "1"}]})
+    install(gs, server)
+    dio.invalidate_cache()
+
+    attempts = []
+
+    def always_down(method, url, **kw):
+        attempts.append(url)
+        raise Exception("network is down")
+
+    gs.requests = type("R", (), {"request": staticmethod(always_down),
+                                 "RequestException": Exception})
+
+    for _ in range(10):
+        assert dio.load_matches(), "must still serve the committed fallback"
+    assert len(attempts) == 1, f"retried the network {len(attempts)} times during an outage"
+    assert dio.storage_status()[0] == "degraded"
+
+    # ...and it recovers once the TTL lapses.
+    with dio._cache_lock:
+        path, (msg, _) = next(iter(dio._stale.items()))
+        dio._stale[path] = (msg, 0)
+    gs.requests = type("R", (), {"request": staticmethod(server.request),
+                                 "RequestException": Exception})
+    dio.load_matches()
+    assert dio.storage_status()[0] == "remote", dio.storage_status()
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failures = 0
