@@ -9,6 +9,20 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 0 — Bugs and papercuts
 
+- [ ] **JSON edits still don't survive a restart.** *(reported 8/27; cost us 3 logged matches)*
+      `utils/github_sync.py` has the two halves of the fix — `pull_file` and `push_file` against
+      the contents API, reading the token and repo out of Streamlit secrets — but **nothing calls
+      either one**. `_save` still writes only to the local filesystem (`utils/data_io.py:24`), and
+      Streamlit Cloud's disk is ephemeral and rebuilt from the repo on every restart or redeploy,
+      so a match added through the app lives until that container dies and then reverts to the
+      committed copy. Wiring `push_file` into the `save_*` functions is the remaining work. Two
+      details to get right while doing it: `push_file` is a read-sha-then-PUT, so two people
+      saving at once means last writer wins unless the save re-reads first; and a fresh container
+      should `pull_file` on load rather than trusting whatever is baked into the image.
+      Also worth cleaning up: `data/*.json` is in `.gitignore` but all seven files are still
+      tracked, so the ignore does nothing — `.gitignore` only applies to untracked files.
+      Untracking them instead would leave a fresh container with no data at all, which is why
+      they came back in "Restoring Match Data". **M, and first — it blocks data entry.**
 - [x] **Match IDs sort as strings.** *(done — sorted in `load_matches`)* `100905275` is our newest match, but string-sorting
       puts it below every 8-digit ID, so "Recent matches" on Home and the top of the Match
       Log are hiding it. Cast to `int` on load. `Home.py:32`, `pages/1_Match_Log.py:13`. **S**
@@ -18,6 +32,29 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 - [ ] ~~**`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay
       the data-entry cost and show none of it. Add to player detail + hero tables as
       per-minute rates, alongside the souls/obj-damage rates that already exist. **S**~~
+- [x] **Tab moved down a column instead of across the row.** *(done — `field_row` in
+      `pages/8_Add_Match.py` renders each field across all six slots)* Entry now runs
+      player-by-player across a row instead of down one player's ten fields. **S**
+- [ ] **Draft slot defaults are the wrong six numbers.** The field now defaults to 1–6 for Hidden
+      King and 7–12 for Archmother (`pages/8_Add_Match.py:132`), but the sides don't draft in
+      blocks: Hidden King is always 1, 4, 5, 8, 9, 12 and Archmother always 2, 3, 6, 7, 10, 11.
+      Two literals. Slots stay editable per row either way, since heroes get typed in whatever
+      order the post-game summary lists them, not in draft order. **S**
+- [ ] **A new player mid-entry throws away the whole form.** Fill out one team, discover somebody
+      on the other side isn't in `players.json`, and the only fix is Add Player / Hero on another
+      page — which loses everything typed. Either preserve the form across the round trip (it's
+      all in `st.session_state` under `{team}_{field}_{i}` keys already) or put an inline
+      "add player / add hero" control inside the Add Match form. **S–M**
+- [ ] **Entry order should follow the post-game screens.** Draft Slot currently sits between Hero
+      and Kills, in the middle of the fields that come off the summary, while bans and first picks
+      live at the bottom — so logging one match means summary → draft → summary → draft → summary
+      → back to the draft sheet. Group everything that comes off the draft screen (slots, bans,
+      first picks) into one block and everything off the summary into another, so each image gets
+      opened once. **S**
+- [ ] **Are early picks redundant now?** `first_picks` is still labelled "draft order not tracked"
+      even though `draft_slot` is captured for every new match, which makes it derivable. Keep the
+      field so the existing 82 matches' stats still compute, or backfill and retire it — worth an
+      explicit decision rather than carrying both forever. **S**
 
 ## Tier 1 — Surface what we already have
 
@@ -41,9 +78,18 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 - [ ] **Awards / superlatives page.** Auto-computed, deliberately unserious: Farm King
       (souls/min), Feeding Frenzy (most deaths), Pacifist (lowest damage), One-Trick (lowest
       hero variety), Coin Flip (win rate closest to 50%), Ironman (most games). Regenerate
-      each session so they rotate. **M**
+      each session so they rotate. Nothing needs tracking in advance — every award here is
+      computable from `matches.json` retroactively, so the only thing to do now is get people
+      caring that the awards are coming. **M**
 - [ ] **Streaks and records.** Longest win/loss streak, best single-game KDA, biggest souls
-      lead, fastest and longest games. Cheap to compute, disproportionately fun. **S–M**
+      lead, fastest and longest games. Cheap to compute, disproportionately fun — but keep the
+      live win streak *hidden*, surfacing it only in the end-of-year awards. A visible streak
+      gives someone a reason to sit out a pug to protect it, or to tilt at a team for breaking
+      it. Anyone who really wants to know can count post-match screenshots. **S–M**
+- [ ] **Captains and captain win rate.** Not recorded anywhere today. Statlocker keeps the drafts,
+      so this is recoverable retroactively as well as trackable going forward — one field on the
+      form, one column on the leaderboard. The same "does publishing this change how people play?"
+      question applies. **S**
 - [x] **Head-to-head.** *(done — `pages/6_Head_to_Head.py`)* Pick two players: record when on the same team vs. opposite sides.
       Settles arguments; generates new ones. **M**
 - [ ] **"Since last week" digest.** After the API date backfill (Tier 4), a Home block
@@ -136,6 +182,24 @@ Available per match, none of it in `matches.json` today:
 - `match_paths` — positional traces → movement heatmaps (**L**, and the most visually
   impressive thing on this list)
 
+### The live events service — a separate, later thing
+
+Kill and death **x, y coordinates** are not in the metadata endpoint; they come back from
+Deadlock's live events service instead. That gates the idea below, and it is explicitly a
+down-the-road item — there is plenty of basic stuff to fix first.
+
+- [ ] **Battle map.** If coordinates arrive with timestamps, plot every kill and death on a map
+      of the lane layout with a time slider scrubbing through the match. Rainman has a decade-plus
+      of GIS work behind this one and reports it lands with everyone, every time; Rogue built
+      something close over TF2 data for a grad-school project. The most impressive thing we could
+      put in front of the group, and the furthest from where we are. **L**
+- [ ] **Evaluate the live events API properly.** Worth a real look if we're still doing this in a
+      year or two — it's where the positional and event-stream data lives.
+- [ ] **Where does this data actually come from?** Several private sites resell Deadlock match
+      lookups, some behind paywalls, and nobody knows what their upstream is. Worth an hour of
+      research into whether there's a first-party Valve endpoint we can hit directly instead of
+      depending on a middleman that can start charging or disappear. **S**
+
 ---
 
 ## Findings so far
@@ -184,3 +248,12 @@ games — 42.9% apart from Kobbert.
   should pull from it rather than inventing colors.
 - At 82 matches, almost every per-hero and per-pair cut is small-sample. Prefer showing
   uncertainty over hiding thin data behind a threshold.
+- **Don't ship a stat that changes how people play.** Anything that creates something to protect
+  — a live win streak above all — gives someone a reason to skip a pug or to blame the lobby
+  instead of enjoying it. The crew is mature enough that this is a background worry rather than a
+  real risk, but the cheap fix is to compute those stats and reveal them only in the awards.
+- Awards can always be computed retroactively from `matches.json`, so nothing has to be tracked
+  in advance for them. The only thing that needs doing early is getting people to care.
+- Data entry is done by hand off the post-game summary and the statlocker draft screen, often on
+  one monitor. Every field we add is a cost paid by whoever is logging, and every image switch we
+  remove from the flow is worth more than it looks.
