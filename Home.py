@@ -39,7 +39,7 @@ if not df.empty:
     msum = stats.matches_summary_df(matches).iloc[::-1].head(10)
     st.dataframe(
         ui.match_summary_display(msum),
-        use_container_width=True, hide_index=True,
+        width='stretch', hide_index=True,
         column_config=ui.MATCH_SUMMARY_COLUMNS,
     )
 else:

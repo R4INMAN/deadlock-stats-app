@@ -33,7 +33,7 @@ st.dataframe(
     # Games, not draft participation: participation counts bans, so a hero the group keeps
     # banning but has barely played was topping a table meant to show who actually gets played.
     .sort_values(["games", "draft_participation_rate"], ascending=[False, False]),
-    use_container_width=True, hide_index=True,
+    width='stretch', hide_index=True,
     column_config={
         "portrait": st.column_config.ImageColumn("", width="small"),
         "hero": st.column_config.TextColumn("Hero"),
@@ -74,7 +74,7 @@ else:
         pb["win_rate"] = (pb["win_rate"] * 100).round(1)
         pb["avg_kp_pct"] = pb["avg_kp_pct"].round(1)
         st.dataframe(
-            pb, use_container_width=True, hide_index=True,
+            pb, width='stretch', hide_index=True,
             column_config={
                 "player": st.column_config.TextColumn("Player"),
                 "games": st.column_config.NumberColumn("Games"),
@@ -247,7 +247,7 @@ else:
         margin=dict(l=70, r=40, t=30, b=60),
         height=520,
     )
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig, width='stretch', config={"displayModeBar": False})
 
     # Standings for the panel come from the unfiltered ranking - the chart drops brief
     # appearances to stay readable, but a hero topping the list today still belongs here.
@@ -274,7 +274,7 @@ else:
             table_display[["match_#", "match_id", "rank", "hero", "participation_%",
                             "banned_in_window", "first_picked_in_window", "picked_in_window"]]
             .sort_values(["match_#", "rank"]),
-            use_container_width=True, hide_index=True,
+            width='stretch', hide_index=True,
         )
 
 ui.brand_footer()

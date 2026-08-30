@@ -235,3 +235,69 @@ def award_column(series, award):
     more quickly than an unchecked box does."""
     uri = award_icon_uri(award)
     return [uri if bool(v) else None for v in series]
+
+
+# --- edit-page storage feedback -----------------------------------------------------------------
+
+def storage_notice():
+    """Say where edits are going, and shout when reads have fallen back to a stale copy.
+
+    Worth the pixels on every edit page: the failure that lost three matches looked exactly
+    like success, so "which store am I writing to" has to be visible before someone spends
+    ten minutes typing a match into it.
+    """
+    from utils import github_sync
+
+    mode, detail = data_io.storage_status()
+    if mode == "remote" and github_sync.writes_to_deploy_branch():
+        st.warning(
+            f"**Saving here redeploys the app.** Edits are committed to `{detail}`, which is a "
+            f"deployed branch - every save reboots the app under everyone using it, and can "
+            f"interrupt a match you are halfway through typing. Point `github_branch` at a "
+            f"data-only branch."
+        )
+    elif mode == "remote":
+        st.caption(f"Edits are committed to `{detail}`.")
+    elif mode == "local":
+        st.caption(
+            f"**Local mode** - edits are written to files on this machine only, and are not "
+            f"committed anywhere. {detail}"
+        )
+    else:
+        st.error(
+            f"**Showing a stale copy.** Could not read the live data, so this page is rendering "
+            f"the version committed to the app's own branch. Anything logged since then is "
+            f"missing, and saving now may be rejected. Reason: {detail}"
+        )
+
+
+def report_save(action, success_message, celebrate=False):
+    """Run a save, and tell the truth about how it went.
+
+    `action` is a zero-argument callable that performs the write. The old code called the save
+    and then printed success unconditionally, so a write that never left the machine still got
+    a green tick and confetti - which is how the loss went unnoticed for a week. Returns True
+    only if the data is actually stored.
+    """
+    from utils import github_sync
+
+    try:
+        action()
+    except ValueError as exc:
+        # A rejection on the merits, checked against freshly pulled data.
+        st.error(str(exc))
+        return False
+    except github_sync.SyncNotConfigured:
+        st.error(
+            "**Not saved.** This app has no `github_token` / `github_repo` in its secrets, so "
+            "there is nowhere durable to write. Add them in the Streamlit Cloud app settings."
+        )
+        return False
+    except github_sync.SyncError as exc:
+        st.error(f"**Not saved.** {exc}")
+        return False
+
+    st.success(success_message)
+    if celebrate:
+        st.balloons()
+    return True

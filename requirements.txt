@@ -1,4 +1,12 @@
-streamlit
-pandas
-plotly
-requests
+# Pinned deliberately. Streamlit Cloud reinstalls from this file on every redeploy, so an
+# unpinned list means the hosted app silently changes version underneath the group whenever
+# anyone pushes - and a breaking release takes every page down at once with no commit to blame.
+# Upgrading is a deliberate act: bump a pin, run both test scripts, then push.
+streamlit==1.62.0
+pandas==3.0.5
+plotly==7.0.0
+requests==2.34.2
+
+# Streamlit already depends on altair, but the trend chart on the Player page imports it
+# directly, so it is named here rather than relied on as a transitive dependency.
+altair==6.2.2

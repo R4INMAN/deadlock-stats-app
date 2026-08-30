@@ -9,6 +9,7 @@ if not require_edit_access():
     st.stop()
 
 ui.page_header("Match Management", "Log a new game, or fix one that went in wrong.")
+ui.storage_notice()
 
 players_dict = data_io.load_players()
 heroes = data_io.load_heroes()
@@ -31,13 +32,13 @@ if mode == "Delete Match":
     winners = [p["team"] for p in match["players"] if p["win"]]
     st.write(f"**Winner:** {winners[0] if winners else 'n/a'}")
     st.dataframe([{"Player": p["player"], "Hero": p["hero"], "Team": p["team"]} for p in match["players"]],
-                 use_container_width=True, hide_index=True)
+                 width='stretch', hide_index=True)
 
     confirm = st.checkbox(f"I'm sure I want to permanently delete match {chosen_id}")
     if st.button("Delete match", disabled=not confirm, type="primary"):
-        data_io.delete_match(chosen_id)
-        st.success(f"Match {chosen_id} deleted.")
-        st.rerun()
+        if ui.report_save(lambda: data_io.delete_match(chosen_id),
+                          f"Match {chosen_id} deleted."):
+            st.rerun()
     st.stop()
 
 # ---------------- ADD / EDIT (shared form) ----------------
@@ -245,11 +246,10 @@ with st.form("match_form", clear_on_submit=False):
                 "bans": bans, "first_picks": first_picks,
             }
             if editing:
-                data_io.update_match(match_id, new_match)
-                st.success(f"Match {match_id} updated!")
+                ui.report_save(lambda: data_io.update_match(match_id, new_match),
+                               f"Match {match_id} updated!")
             else:
-                data_io.add_match(new_match)
-                st.success(f"Match {match_id} saved!")
-                st.balloons()
+                ui.report_save(lambda: data_io.add_match(new_match),
+                               f"Match {match_id} saved!", celebrate=True)
 
 ui.brand_footer()

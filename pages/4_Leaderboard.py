@@ -27,7 +27,7 @@ else:
     display["portrait"] = ui.hero_portrait_column(display["most_played_hero"])
     st.dataframe(
         display[["portrait", "player", "games", "wins", "win_rate", "most_played_hero"]],
-        use_container_width=True,
+        width='stretch',
         column_config={
             "portrait": st.column_config.ImageColumn("", width="small",
                                                       help="Most played hero"),

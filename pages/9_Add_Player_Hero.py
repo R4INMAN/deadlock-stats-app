@@ -7,6 +7,7 @@ if not require_edit_access():
     
 st.set_page_config(page_title="Add Player / Hero", page_icon="assets/ui/puddle_punch.png", layout="wide")
 ui.page_header("Add Player / Hero", "Register someone new before their first game.")
+ui.storage_notice()
 
 players = data_io.load_players()
 heroes = data_io.load_heroes()
@@ -25,12 +26,12 @@ with col1:
             elif name in players:
                 st.error(f"{name} already exists.")
             else:
-                data_io.add_player(name.strip(), notes.strip())
-                st.success(f"Added player {name}.")
-                st.rerun()
+                if ui.report_save(lambda: data_io.add_player(name.strip(), notes.strip()),
+                                  f"Added player {name}."):
+                    st.rerun()
 
     st.markdown(f"**Current players ({len(players)}):**")
-    st.dataframe(sorted(players.keys()), use_container_width=True, hide_index=True)
+    st.dataframe(sorted(players.keys()), width='stretch', hide_index=True)
 
 with col2:
     st.subheader("Add a hero")
@@ -43,11 +44,11 @@ with col2:
             elif hero_name in heroes:
                 st.error(f"{hero_name} already exists.")
             else:
-                data_io.add_hero(hero_name.strip())
-                st.success(f"Added hero {hero_name}.")
-                st.rerun()
+                if ui.report_save(lambda: data_io.add_hero(hero_name.strip()),
+                                  f"Added hero {hero_name}."):
+                    st.rerun()
 
     st.markdown(f"**Current heroes ({len(heroes)}):**")
-    st.dataframe(sorted(heroes), use_container_width=True, hide_index=True)
+    st.dataframe(sorted(heroes), width='stretch', hide_index=True)
 
 ui.brand_footer()

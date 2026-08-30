@@ -95,4 +95,4 @@ msum = stats.matches_summary_df(matches).iloc[::-1]
 msum = msum[msum["match_id"].isin(ids)].copy()
 msum["side"] = ["teammates" if mid in set(together["match_ids"]) else "opponents"
                 for mid in msum["match_id"]]
-st.dataframe(msum, use_container_width=True, hide_index=True)
+st.dataframe(msum, width='stretch', hide_index=True)
