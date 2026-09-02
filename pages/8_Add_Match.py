@@ -11,7 +11,7 @@ if not require_edit_access():
 ui.page_header("Match Management", "Log a new game, or fix one that went in wrong.")
 ui.storage_notice()
 
-players_dict = data_io.load_players()
+players_dict = data_io.players_by_name()
 heroes = data_io.load_heroes()
 matches = data_io.load_matches()
 player_names = sorted(players_dict.keys())
@@ -230,6 +230,9 @@ with st.form("match_form", clear_on_submit=False):
                 kp = round((r["kills"] + r["assists"]) / tk * 100, 2)
                 players_out.append({
                     "team": r["team"], "player": r["player"], "hero": r["hero"],
+                    # The person, not the name. Everything that reads this match back resolves
+                    # the display name from here, so a later alias change carries the row with it.
+                    "player_key": players_dict[r["player"]]["player_key"],
                     "win": r["team"] == winning_side,
                     "mvp": r["player"] == mvp,
                     "key_player": r["player"] in key_players,

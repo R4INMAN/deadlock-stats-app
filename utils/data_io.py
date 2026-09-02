@@ -158,18 +158,65 @@ def match_sort_key(match_id):
 
 
 def load_matches():
-    """Matches in chronological order (ascending match ID).
+    """Matches in chronological order (ascending match ID), under current display names.
 
     Sorting here rather than at each call site means everything downstream that treats list
     position as time - the rolling draft-participation timeline especially - gets a real
     chronological axis for free.
+
+    Resolving names here is the same bargain. Each player row stores a `player_key` - the
+    person - and the nickname that was typed on the night. Names are looked up from the key on
+    the way out, so someone who changes their alias changes it in one record and every page
+    follows: stats, chemistry, leaderboards, rank history. Nothing downstream knows this
+    happened, which is why none of it had to change.
+
+    A row with no key, or a key no longer in players.json, keeps the nickname it was stored
+    with. Losing a player's name should degrade to the old behaviour, not to a blank column.
     """
     matches = _load(MATCHES_FILE, [])
-    return sorted(matches, key=lambda m: match_sort_key(m.get("match_id")))
+    matches = sorted(matches, key=lambda m: match_sort_key(m.get("match_id")))
+    names = display_names()
+    for match in matches:
+        for row in match.get("players", []):
+            row["player"] = names.get(row.get("player_key"), row.get("player"))
+    return matches
 
 
 def load_players():
+    """The player store, keyed by player_key: a Steam account id, or a nickname until we see one."""
     return _load(PLAYERS_FILE, {})
+
+
+def display_names(players=None):
+    """{player_key: current display name}."""
+    players = players if players is not None else load_players()
+    return {key: rec.get("display_name", key) for key, rec in players.items()}
+
+
+def players_by_name(players=None):
+    """{display name: record}, for the pages that present players as names rather than keys.
+
+    Two records can only collide here if two people are genuinely using the same display name,
+    which is a thing to fix in the data rather than to paper over, so the later key wins and
+    the duplicate is visible on the page.
+    """
+    players = players if players is not None else load_players()
+    return {rec.get("display_name", key): {**rec, "player_key": key}
+            for key, rec in players.items()}
+
+
+def key_for_account(account_id, players=None):
+    """The player who owns a Steam account id, or None if we have never seen it.
+
+    Checks every id a player owns, not just the primary: eight of our regulars have an alt,
+    and a game played on one is still a game played by them.
+    """
+    players = players if players is not None else load_players()
+    account_id = str(account_id)
+    for key, rec in players.items():
+        if account_id in rec.get("account_ids", []):
+            return key
+    return None
 
 
 def load_heroes():
@@ -274,18 +321,105 @@ def delete_match(match_id):
     return found["hit"]
 
 
-def add_player(name, notes=""):
-    """Register a player. Returns False if already known; raises SyncError if it didn't save."""
+def add_player(name, notes="", account_id=None):
+    """Register a player. Returns False if already known; raises SyncError if it didn't save.
+
+    Keyed by `account_id` when the caller has one - the match importer does, since it learns a
+    person's account before it ever learns their name - and by nickname when it does not. A
+    nickname key is a placeholder: it is what someone typed, and it is replaced by the account
+    id the first time that person shows up in an imported match.
+    """
+    key = str(account_id) if account_id else name
     added = {"hit": False}
 
     def op(players):
-        added["hit"] = name not in players
+        taken = key in players or any(
+            rec.get("display_name") == name for rec in players.values()
+        )
+        added["hit"] = not taken
         if not added["hit"]:
             return players
-        return {**players, name: {"notes": notes, "reported_rank": None}}
+        record = {
+            "display_name": name,
+            "account_ids": [str(account_id)] if account_id else [],
+            "aliases": [name],
+            "notes": notes,
+            "reported_rank": None,
+        }
+        return {**players, key: record}
 
     _mutate(PLAYERS_FILE, op, f"Add player {name}", {})
     return added["hit"]
+
+
+def rename_player(player_key, new_name):
+    """Change a player's display name. Returns False if the key is unknown.
+
+    The whole point of the re-keying: this touches one field. Every match row, rank entry,
+    leaderboard position and chemistry pair follows from it, because none of them ever stored
+    the name in the first place. The old name is kept as an alias so it stays searchable and so
+    nobody wonders later who a historical row belonged to.
+    """
+    found = {"hit": False}
+
+    def op(players):
+        found["hit"] = player_key in players
+        if not found["hit"]:
+            return players
+        record = dict(players[player_key])
+        old = record.get("display_name")
+        record["display_name"] = new_name
+        record["aliases"] = sorted(set(record.get("aliases", [])) | {old, new_name} - {None})
+        return {**players, player_key: record}
+
+    _mutate(PLAYERS_FILE, op, f"Rename {player_key} to {new_name}", {})
+    return found["hit"]
+
+
+def link_account(player_key, account_id):
+    """Attach a Steam account id to a player, re-keying them if they had no id before.
+
+    A player first seen in a match the API does not have is keyed by nickname. When they later
+    turn up in an imported match we finally learn their account, and this is where the
+    placeholder key is retired - which means rewriting the match and rank rows that point at
+    it, since a key is only useful while everything agrees on it.
+    """
+    account_id = str(account_id)
+    new_key = account_id if not str(player_key).isdigit() else player_key
+
+    def op(players):
+        if player_key not in players:
+            return players
+        record = dict(players[player_key])
+        if account_id not in record.get("account_ids", []):
+            record["account_ids"] = list(record.get("account_ids", [])) + [account_id]
+        out = {k: v for k, v in players.items() if k != player_key}
+        out[new_key] = record
+        return out
+
+    _mutate(PLAYERS_FILE, op, f"Link account {account_id} to {player_key}", {})
+
+    if new_key != player_key:
+        _repoint(player_key, new_key)
+    return new_key
+
+
+def _repoint(old_key, new_key):
+    """Move every match row and rank entry from one player_key to another."""
+    def move_matches(matches):
+        out = []
+        for match in matches:
+            rows = [{**r, "player_key": new_key} if r.get("player_key") == old_key else r
+                    for r in match.get("players", [])]
+            out.append({**match, "players": rows})
+        return out
+
+    def move_ranks(ranks):
+        return [{**r, "player_key": new_key} if r.get("player_key") == old_key else r
+                for r in ranks]
+
+    _mutate(MATCHES_FILE, move_matches, f"Re-key {old_key} as {new_key}", [])
+    _mutate(RANKS_FILE, move_ranks, f"Re-key {old_key} as {new_key}", [])
 
 
 def add_hero(name):
@@ -302,25 +436,39 @@ def add_hero(name):
     return added["hit"]
 
 
-def add_rank_entry(player, rank, entry_date=None):
-    """Append a rank observation. Raises SyncError if it didn't save."""
-    entry = {"player": player, "rank": rank, "date": entry_date or str(date.today())}
-    _mutate(RANKS_FILE, lambda ranks: list(ranks) + [entry], f"Rank {player} as {rank}", [])
+def add_rank_entry(player_key, rank, entry_date=None, display_name=None):
+    """Append a rank observation against a player_key. Raises SyncError if it didn't save.
+
+    The name is written alongside the key for the same reason match rows keep theirs: it is
+    what the person was called when the rank was logged, and it makes the raw file readable.
+    Nothing reads it back.
+    """
+    entry = {
+        "player_key": player_key,
+        "player": display_name or player_key,
+        "rank": rank,
+        "date": entry_date or str(date.today()),
+    }
+    _mutate(RANKS_FILE, lambda ranks: list(ranks) + [entry], f"Rank {entry['player']} as {rank}", [])
     return True
 
 
 # ---------------------------------------------------------------- derived
 
-def current_rank(player, ranks=None):
+def current_rank(player_key, ranks=None):
     """Most recent rank entry for a player, or None."""
     ranks = ranks if ranks is not None else load_ranks()
-    entries = [r for r in ranks if r["player"] == player]
+    entries = [r for r in ranks if r.get("player_key", r.get("player")) == player_key]
     if not entries:
         return None
 
-    # 'import' sorts first alphabetically before real dates in most cases; fall back safely
+    # The seeded rows are dated 'import' rather than a real date, and they are the oldest thing
+    # we have on anyone - so they sort first and every real date sorts after. Sorting them last
+    # instead pins a player to their seeded rank forever: the newest entry is read off the end,
+    # and 'import' would always be the end. It has never shown up because no one has logged a
+    # rank for a seeded player yet, and all 42 of them are seeded.
     def sort_key(r):
-        return (r["date"] == "import", r["date"])
+        return (r["date"] != "import", r["date"])
 
     entries.sort(key=sort_key)
     return entries[-1]["rank"]
