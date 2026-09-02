@@ -1,0 +1,979 @@
+{
+ "_readme": "Review `unresolved` and fill in each `account_id` by hand, then apply. Entries with a non-empty `we_have_they_dont` are worth checking even when confident: each is a match whose roster disagrees with the API.",
+ "proposals": {
+  "Alex": {
+   "account_id": "58081282",
+   "games_seen": 5,
+   "overlap": 1.0,
+   "margin": 0.8,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "AppleSteak": {
+   "account_id": "111047502",
+   "games_seen": 30,
+   "overlap": 1.0,
+   "margin": 0.467,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Atlas": {
+   "account_id": "206150335",
+   "games_seen": 5,
+   "overlap": 1.0,
+   "margin": 0.4,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Bam": {
+   "account_id": "109134972",
+   "games_seen": 11,
+   "overlap": 1.0,
+   "margin": 0.591,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Bethnicz": {
+   "account_id": "249577225",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Bib": {
+   "account_id": "1007573047",
+   "games_seen": 4,
+   "overlap": 1.0,
+   "margin": 0.846,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "BigOlMoth": {
+   "account_id": "108856081",
+   "games_seen": 3,
+   "overlap": 1.0,
+   "margin": 0.4,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "COW-XPLODER": {
+   "account_id": "366237709",
+   "games_seen": 5,
+   "overlap": 1.0,
+   "margin": 0.6,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "CountryToad": {
+   "account_id": "82353518",
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Ctak": {
+   "account_id": "112019808",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Cynder": {
+   "account_id": "878876985",
+   "games_seen": 6,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Cypress": {
+   "account_id": "105065651",
+   "games_seen": 11,
+   "overlap": 1.0,
+   "margin": 0.643,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Dane": {
+   "account_id": "403545937",
+   "games_seen": 20,
+   "overlap": 1.0,
+   "margin": 0.564,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "DefinitlyNotABotBear": {
+   "account_id": "290434530",
+   "games_seen": 4,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Dryxs": {
+   "account_id": "113545657",
+   "games_seen": 12,
+   "overlap": 1.0,
+   "margin": 0.703,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Flow": {
+   "account_id": "1200612121",
+   "games_seen": 5,
+   "overlap": 0.6,
+   "margin": 0.2,
+   "we_have_they_dont": [
+    "92773443",
+    "92781500"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "probable"
+  },
+  "Goth": {
+   "account_id": "190806284",
+   "games_seen": 8,
+   "overlap": 1.0,
+   "margin": 0.625,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Hail": {
+   "account_id": "114452421",
+   "games_seen": 3,
+   "overlap": 1.0,
+   "margin": 0.333,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Happy Chappy": {
+   "account_id": "55354217",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.667,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Jmgoblue": {
+   "account_id": "862668582",
+   "games_seen": 11,
+   "overlap": 1.0,
+   "margin": 0.615,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "KNyne": {
+   "account_id": "30456049",
+   "games_seen": 30,
+   "overlap": 1.0,
+   "margin": 0.465,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Kobbert": {
+   "account_id": "84775105",
+   "games_seen": 39,
+   "overlap": 1.0,
+   "margin": 0.404,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Koga": {
+   "account_id": "84408942",
+   "games_seen": 10,
+   "overlap": 1.0,
+   "margin": 0.696,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Komodo": {
+   "account_id": "1391675063",
+   "games_seen": 28,
+   "overlap": 0.964,
+   "margin": 0.438,
+   "we_have_they_dont": [
+    "77042318"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Kudoh": {
+   "account_id": "50797463",
+   "games_seen": 15,
+   "overlap": 1.0,
+   "margin": 0.536,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Lay": {
+   "account_id": "312383380",
+   "games_seen": 26,
+   "overlap": 0.885,
+   "margin": 0.371,
+   "we_have_they_dont": [
+    "79678601",
+    "95651214",
+    "95657806"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Lee Harvey": {
+   "account_id": "130927010",
+   "games_seen": 20,
+   "overlap": 1.0,
+   "margin": 0.531,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Micahlele": {
+   "account_id": "195606628",
+   "games_seen": 4,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Mister Unknown": {
+   "account_id": "83758398",
+   "games_seen": 3,
+   "overlap": 1.0,
+   "margin": 0.6,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Mori": {
+   "account_id": "108135668",
+   "games_seen": 9,
+   "overlap": 0.889,
+   "margin": 0.498,
+   "we_have_they_dont": [
+    "77686057"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Naajj": {
+   "account_id": "35715439",
+   "games_seen": 4,
+   "overlap": 1.0,
+   "margin": 0.6,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Paulie": {
+   "account_id": "72076072",
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Plecostomus Bread": {
+   "account_id": "474790176",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Puddle": {
+   "account_id": "98556858",
+   "games_seen": 26,
+   "overlap": 1.0,
+   "margin": 0.488,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Rainman": {
+   "account_id": "106168694",
+   "games_seen": 19,
+   "overlap": 0.789,
+   "margin": 0.373,
+   "we_have_they_dont": [
+    "86136446",
+    "88451330",
+    "93734655",
+    "93741690"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "probable"
+  },
+  "Rogue": {
+   "account_id": "74203513",
+   "games_seen": 21,
+   "overlap": 1.0,
+   "margin": 0.571,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Shambles": {
+   "account_id": "168207694",
+   "games_seen": 5,
+   "overlap": 1.0,
+   "margin": 0.583,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Shan": {
+   "account_id": "1141151250",
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.75,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Siegmeyer": {
+   "account_id": "124249807",
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Snortwaffle": {
+   "account_id": "87793526",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.333,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "SoduhMan": {
+   "account_id": "102814434",
+   "games_seen": 5,
+   "overlap": 1.0,
+   "margin": 0.667,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Spades": {
+   "account_id": "104212673",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.333,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Sulley": {
+   "account_id": "187274453",
+   "games_seen": 29,
+   "overlap": 0.897,
+   "margin": 0.385,
+   "we_have_they_dont": [
+    "82495979",
+    "85042683",
+    "85053385"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "The New Bob": {
+   "account_id": "1161806828",
+   "games_seen": 5,
+   "overlap": 1.0,
+   "margin": 0.6,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "TheBigGing": {
+   "account_id": "100883133",
+   "games_seen": 36,
+   "overlap": 1.0,
+   "margin": 0.404,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Tris": {
+   "account_id": "357001846",
+   "games_seen": 7,
+   "overlap": 1.0,
+   "margin": 0.444,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Vandeer": {
+   "account_id": "159858279",
+   "games_seen": 14,
+   "overlap": 0.857,
+   "margin": 0.399,
+   "we_have_they_dont": [
+    "81175384",
+    "81184797"
+   ],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Wolfgang": {
+   "account_id": "130622921",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "Wurdle": {
+   "account_id": "16318483",
+   "games_seen": 16,
+   "overlap": 1.0,
+   "margin": 0.6,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "ham": {
+   "account_id": "48298304",
+   "games_seen": 3,
+   "overlap": 1.0,
+   "margin": 0.571,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  },
+  "ophianoi": {
+   "account_id": "1128930437",
+   "games_seen": 1,
+   "overlap": 0.5,
+   "margin": 0.167,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [
+    "88647852"
+   ],
+   "confidence": "probable"
+  },
+  "saiyafan": {
+   "account_id": "198098203",
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.5,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "confidence": "confident"
+  }
+ },
+ "unresolved": {
+  "AntiMatter": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "404529275",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "242379785",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "176709124",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1421644768",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "474790176",
+     "overlap": 0.5
+    }
+   ]
+  },
+  "Carbon Dioxide Addict": {
+   "account_id": null,
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "168157156",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1052486325",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1826116850",
+     "overlap": 0.667
+    },
+    {
+     "account_id": "1161806828",
+     "overlap": 0.4
+    },
+    {
+     "account_id": "113545657",
+     "overlap": 0.167
+    }
+   ]
+  },
+  "Chocc": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "1853937641",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "107804483",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "862668582",
+     "overlap": 0.091
+    },
+    {
+     "account_id": "109134972",
+     "overlap": 0.091
+    },
+    {
+     "account_id": "50797463",
+     "overlap": 0.067
+    }
+   ]
+  },
+  "Cleared": {
+   "account_id": null,
+   "games_seen": 14,
+   "overlap": 0.5,
+   "margin": 0.0,
+   "we_have_they_dont": [
+    "92773443",
+    "92781500",
+    "93734655",
+    "93741690",
+    "95651214",
+    "95657806",
+    "95676617"
+   ],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "753622616",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "357001846",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "50797463",
+     "overlap": 0.381
+    },
+    {
+     "account_id": "113545657",
+     "overlap": 0.368
+    },
+    {
+     "account_id": "111047502",
+     "overlap": 0.333
+    }
+   ]
+  },
+  "Dreman22": {
+   "account_id": null,
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "168157156",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1052486325",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1826116850",
+     "overlap": 0.667
+    },
+    {
+     "account_id": "1161806828",
+     "overlap": 0.4
+    },
+    {
+     "account_id": "113545657",
+     "overlap": 0.167
+    }
+   ]
+  },
+  "Ehko": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "404529275",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "242379785",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "176709124",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1421644768",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "474790176",
+     "overlap": 0.5
+    }
+   ]
+  },
+  "Gavaboo": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "1853937641",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "107804483",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "862668582",
+     "overlap": 0.091
+    },
+    {
+     "account_id": "109134972",
+     "overlap": 0.091
+    },
+    {
+     "account_id": "50797463",
+     "overlap": 0.067
+    }
+   ]
+  },
+  "LawnFlamingo": {
+   "account_id": null,
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "202782548",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1679381193",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "830976701",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "1893621565",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "124249807",
+     "overlap": 0.5
+    }
+   ]
+  },
+  "Maeko": {
+   "account_id": null,
+   "games_seen": 7,
+   "overlap": 0.571,
+   "margin": 0.071,
+   "we_have_they_dont": [
+    "72924686",
+    "72934975",
+    "81184797"
+   ],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "830976701",
+     "overlap": 0.571
+    },
+    {
+     "account_id": "108135668",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "114452421",
+     "overlap": 0.429
+    },
+    {
+     "account_id": "84408942",
+     "overlap": 0.308
+    },
+    {
+     "account_id": "312383380",
+     "overlap": 0.304
+    }
+   ]
+  },
+  "Purple": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "404529275",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "242379785",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "176709124",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1421644768",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "474790176",
+     "overlap": 0.5
+    }
+   ]
+  },
+  "ToastedRainbows": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "404529275",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "242379785",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "176709124",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1421644768",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "474790176",
+     "overlap": 0.5
+    }
+   ]
+  },
+  "Wiggi": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "85514536",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "33491428",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "249577225",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "195606628",
+     "overlap": 0.25
+    },
+    {
+     "account_id": "366237709",
+     "overlap": 0.2
+    }
+   ]
+  },
+  "Wonky": {
+   "account_id": null,
+   "games_seen": 2,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "202782548",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "1679381193",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "830976701",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "1893621565",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "124249807",
+     "overlap": 0.5
+    }
+   ]
+  },
+  "Wuba": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 1.0,
+   "margin": 0.0,
+   "we_have_they_dont": [],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "85514536",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "33491428",
+     "overlap": 1.0
+    },
+    {
+     "account_id": "249577225",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "195606628",
+     "overlap": 0.25
+    },
+    {
+     "account_id": "366237709",
+     "overlap": 0.2
+    }
+   ]
+  },
+  "glyde": {
+   "account_id": null,
+   "games_seen": 1,
+   "overlap": 0.0,
+   "margin": 0.0,
+   "we_have_they_dont": [
+    "88647852"
+   ],
+   "they_have_we_dont": [],
+   "candidates": [
+    {
+     "account_id": "55354217",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "1128930437",
+     "overlap": 0.5
+    },
+    {
+     "account_id": "48298304",
+     "overlap": 0.333
+    },
+    {
+     "account_id": "58081282",
+     "overlap": 0.2
+    },
+    {
+     "account_id": "753622616",
+     "overlap": 0.143
+    }
+   ]
+  }
+ },
+ "local_only": [
+  "A.T.",
+  "Ailius",
+  "Ayboii",
+  "Frominican",
+  "Jackawa",
+  "Jayeezy",
+  "Jerry",
+  "Jojo",
+  "Lappland",
+  "Pooch",
+  "Woof Woof",
+  "ash",
+  "metrovictim2008"
+ ]
+}
