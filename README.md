@@ -23,6 +23,7 @@ streamlit run Home.py
 - `.streamlit/config.toml` — the app theme, using the game's own colors
 - `fetch_deadlock_assets.py` — re-run to refresh vendored art and colors when Valve adds or reworks heroes
 - `scripts/check_sync.py` — verify the app can read and write its data store
+- `scripts/refresh_fallback.py` — refresh main's fallback copy of `data/*.json` from the `data` branch
 - `tests/` — two plain scripts, no runner to install; see **Tests**
 - `convert_csv.py` — the one-time import script that built data/*.json from your old Google Sheet CSVs (kept for reference, not needed to run the app)
 
@@ -47,7 +48,18 @@ different matches at the same moment both land.
 
 `main` keeps its own copy of `data/*.json`. That is the seed for local development and the
 fallback the app renders if GitHub is unreachable, so it drifts behind the `data` branch over
-time. Refresh it from there when the gap starts to matter.
+time. `scripts/refresh_fallback.py` closes the gap when it starts to matter: it pulls the four
+live files down onto your working tree, and you commit them on a branch like any other change.
+
+```
+python scripts/refresh_fallback.py           # how far behind is it?
+python scripts/refresh_fallback.py --write   # bring the working tree up to date
+```
+
+Refresh by copying files, never by merging `data` into `main`. The data branch carries its own
+history - a commit per logged match, plus the `_sync_check.json` heartbeat - so a merge would
+drag all of that onto `main` and put the heartbeat on a branch that should not have it. It would
+also destroy the data branch outright if the repo is set to delete head branches on merge.
 
 ### Configuring it
 
