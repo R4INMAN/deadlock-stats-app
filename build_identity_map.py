@@ -1,207 +1,167 @@
-"""Propose a `nickname -> Steam account_id` map by matching rosters against the API.
+"""Propose a `nickname -> Steam account_id` map by matching box scores against the API.
 
     python build_identity_map.py            # writes data/identity_proposal.json
 
 We key players by nickname; the Deadlock API keys them by `account_id` and returns no name at
-all. So the map cannot be looked up - it has to be inferred once, and the lever is
-co-occurrence: a player who appears in matches {3, 9, 14} is the account that appears in
-matches {3, 9, 14}. Across the API-visible matches most people have a match-set nobody else
-shares, and fall out uniquely.
+all. So the map cannot be looked up - it has to be inferred once, from the only thing the two
+sides share: the numbers.
 
-Why similarity rather than exact set equality. Our rosters are hand-typed, so a few of them
-disagree with the API - a sub who was never recorded, a wrong pick in the dropdown. Requiring
-an exact match makes one bad row anywhere in a 43-game career disqualify that player against
-every account, which is precisely backwards: the people with the most games, whose identity is
-least in doubt, are the ones most likely to carry a typo somewhere. Jaccard overlap degrades
-gracefully instead, and the residual disagreements are reported rather than hidden - each one
-is a match worth looking at by hand.
+For a match the API has, we know the twelve rows we typed and it knows the twelve rows it
+recorded, and they are the same twelve games of Deadlock. A line of 4/5/2 on Mina is unique
+within a lobby almost every time - 99% of API stat lines are, across our history - so lining
+the two rosters up against each other identifies each player individually, in a single match,
+with no reference to anything else they have ever played. That matters for the one-game
+guests, who are exactly the people a co-occurrence approach cannot separate: if two of them
+only ever played in the same match, their careers are identical and nothing distinguishes
+them, but their box scores still do.
 
-Two kinds of player cannot be resolved here, and are not guesses to make:
+Scoring is deliberately loose, because our rows are hand-typed and a few carry a typo. An
+exact K/D/A wins outright; a hero match plus a near-miss K/D/A also clears the bar; net worth
+against our recorded souls breaks what is left. Pairings that clear nothing are dropped rather
+than guessed - four of 576 across our history.
 
-  - Someone who has only ever played in the same matches as someone else. Their match-sets are
-    identical, so no amount of arithmetic separates them; the proposal lists the candidates and
-    a human picks. This is most of the residue, and it is all low-game-count players.
-  - Someone who appears only in the matches the API never ingested. There is no account_id to
-    find. They get a `local:` key and can be upgraded the first time they turn up in an
-    imported match.
+Each match casts one vote per player, and the votes are aggregated at the end. Two things fall
+out of that which a single match could not tell you:
+
+  - **Alt accounts.** Nine of our regulars vote overwhelmingly for one account and a handful of
+    times for another. That is not noise to be smoothed away, it is a second Steam account, and
+    it is why a player owns a *list* of account_ids rather than one. Miss this and every game
+    played on the alt silently detaches from its player.
+  - **Alias changes.** An account that votes for two different nicknames is one person we have
+    been recording as two people. There is one in our history.
 
 This script only proposes. It does not touch players.json or matches.json - review
-data/identity_proposal.json, fill in the `unresolved` entries, then apply it.
+data/identity_proposal.json, then apply it.
 """
 import collections
 import json
 import os
 import sys
-from concurrent.futures import ThreadPoolExecutor
 
-import requests
-
-from utils import data_io
+from utils import data_io, deadlock_api
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 CACHE_FILE = os.path.join(ROOT_DIR, "data", ".api_match_cache.json")
 PROPOSAL_FILE = os.path.join(ROOT_DIR, "data", "identity_proposal.json")
 
-METADATA_URL = "https://api.deadlock-api.com/v1/matches/{}/metadata"
-# The default urllib/requests User-Agent is refused with a 403; any real one is fine. Easy to
-# misread as the API having died.
-HEADERS = {"User-Agent": "deadlock-stats-app/1.0 (PUG stats)"}
-WORKERS = 4
-TIMEOUT = 25
+# A pairing is only allowed to vote if it clears this. The scale below is built so that an
+# exact K/D/A alone clears it, and so does the right hero with a K/D/A off by one or two - but
+# a hero match on its own never does, since six players a side means heroes repeat across the
+# lobby far more often than stat lines do.
+MIN_PAIR_SCORE = 6.0
 
-# A proposal is taken as settled when it overlaps this well and beats its runner-up by this
-# much. Both matter: a lone high score means little when a second account scores the same.
-CONFIDENT_OVERLAP = 0.8
-CONFIDENT_MARGIN = 0.3
-PROBABLE_MARGIN = 0.15
+# Below this share of a player's votes, an account is reported for review rather than adopted.
+# A real alt shows up across several games; a single stray vote is more likely one bad pairing.
+ALT_ADOPT_SHARE = 0.10
 
 
-def fetch_account_ids(match_ids):
-    """{match_id: [account_id, ...] or None}, cached on disk so re-runs are cheap.
+def pair_score(ours, theirs):
+    """How strongly one of our rows and one API row look like the same player-game."""
+    score = 0.0
 
-    A miss is cached too. Our custom lobbies are not in the API's database and never will be,
-    and an uncached miss costs a timeout on every re-run.
+    off = (abs(ours["kills"] - theirs["kills"])
+           + abs(ours["deaths"] - theirs["deaths"])
+           + abs(ours["assists"] - theirs["assists"]))
+    score += 6.0 if off == 0 else max(0.0, 3.0 - off)
+
+    if deadlock_api.our_hero_name_matches(ours["hero"], theirs["hero_id"]):
+        score += 4.0
+
+    # Our souls are recorded in thousands, the API's net worth in ones.
+    if ours.get("souls_k") is not None and theirs.get("net_worth"):
+        score += max(0.0, 2.0 - abs(ours["souls_k"] - theirs["net_worth"] / 1000.0))
+
+    return score
+
+
+def pair_up(our_rows, their_rows):
+    """Best one-to-one pairing of our roster against theirs, as (our row, their row).
+
+    Greedy from the highest-scoring pair down. An optimal assignment would cost a dependency
+    and change nothing: a correct pairing scores near the ceiling while its rivals sit far
+    below, so no ordering of these choices reaches a different answer.
     """
-    cache = {}
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, encoding="utf-8") as fh:
-            cache = json.load(fh)
-
-    todo = [m for m in match_ids if m not in cache]
-    if todo:
-        print(f"Fetching {len(todo)} match{'es' if len(todo) != 1 else ''} from the API...")
-
-        def one(match_id):
-            try:
-                r = requests.get(METADATA_URL.format(match_id), headers=HEADERS, timeout=TIMEOUT)
-                if r.status_code != 200:
-                    return match_id, None
-                info = r.json().get("match_info", {})
-                ids = [p.get("account_id") for p in info.get("players", [])]
-                return match_id, [i for i in ids if i] or None
-            except (requests.RequestException, ValueError):
-                return match_id, None
-
-        with ThreadPoolExecutor(WORKERS) as pool:
-            for match_id, ids in pool.map(one, todo):
-                cache[match_id] = ids
-        with open(CACHE_FILE, "w", encoding="utf-8") as fh:
-            json.dump(cache, fh, indent=1)
-
-    return {m: cache.get(m) for m in match_ids}
-
-
-def match_sets(matches, api):
-    """(nickname -> match ids, account_id -> match ids), over the API-visible matches only."""
-    names, accounts = collections.defaultdict(set), collections.defaultdict(set)
-    for match in matches:
-        ids = api.get(match["match_id"])
-        if not ids:
-            continue
-        for player in match["players"]:
-            names[player["player"]].add(match["match_id"])
-        for account_id in ids:
-            accounts[str(account_id)].add(match["match_id"])
-    return names, accounts
-
-
-def jaccard(a, b):
-    return len(a & b) / len(a | b)
-
-
-def solve(names, accounts):
-    """Greedy one-to-one assignment by overlap, highest-scoring pair first.
-
-    Greedy rather than a full optimal assignment because the score gaps here are not close: a
-    real pairing sits near 1.0 with its runner-up well below, so the order pairs are taken in
-    does not change the answer. It also keeps every decision explainable as its own number,
-    which is what a human reviewing the borderline ones actually needs.
-
-    Returns {nickname: (account_id, overlap, margin over the runner-up)}.
-    """
-    scored = sorted(
-        (jaccard(s, t), name, account_id)
-        for name, s in names.items()
-        for account_id, t in accounts.items()
-        if s & t
+    ranked = sorted(
+        ((pair_score(o, t), i, j) for i, o in enumerate(our_rows) for j, t in enumerate(their_rows)),
+        key=lambda x: x[0],
+        reverse=True,
     )
-    scored.reverse()
-
-    best, runner_up = collections.defaultdict(float), collections.defaultdict(float)
-    for score, name, _ in scored:
-        if score > best[name]:
-            runner_up[name], best[name] = best[name], score
-        elif score > runner_up[name]:
-            runner_up[name] = score
-
-    assigned, taken = {}, set()
-    for score, name, account_id in scored:
-        if name in assigned or account_id in taken:
+    used_ours, used_theirs, out = set(), set(), []
+    for score, i, j in ranked:
+        if i in used_ours or j in used_theirs:
             continue
-        assigned[name] = (account_id, score, score - runner_up[name])
-        taken.add(account_id)
-    return assigned
+        used_ours.add(i)
+        used_theirs.add(j)
+        if score >= MIN_PAIR_SCORE:
+            out.append((our_rows[i], their_rows[j]))
+    return out
 
 
-def confidence(overlap, margin):
-    if overlap >= CONFIDENT_OVERLAP and margin >= CONFIDENT_MARGIN:
-        return "confident"
-    return "probable" if margin >= PROBABLE_MARGIN else "unresolved"
+def collect_votes(matches, api):
+    """(nickname -> Counter of account_ids, account_id -> Counter of nicknames, rows dropped)."""
+    by_name = collections.defaultdict(collections.Counter)
+    by_account = collections.defaultdict(collections.Counter)
+    paired = considered = 0
+
+    for match in matches:
+        their_rows = api.get(match["match_id"])
+        if not their_rows:
+            continue
+        considered += len(match["players"])
+        for ours, theirs in pair_up(match["players"], their_rows):
+            paired += 1
+            name, account_id = ours["player"], str(theirs["account_id"])
+            by_name[name][account_id] += 1
+            by_account[account_id][name] += 1
+
+    return by_name, by_account, considered - paired
 
 
 def build(matches, api):
     """The whole proposal, as the dict written to disk."""
-    names, accounts = match_sets(matches, api)
-    assigned = solve(names, accounts)
+    by_name, by_account, dropped = collect_votes(matches, api)
 
-    proposals, unresolved = {}, {}
-    for name in sorted(names):
-        account_id, overlap, margin = assigned.get(name, (None, 0.0, 0.0))
-        kind = confidence(overlap, margin) if account_id else "unresolved"
-        ours = names[name]
-        theirs = accounts.get(account_id, set()) if account_id else set()
-        entry = {
-            "account_id": account_id,
-            "games_seen": len(ours),
-            "overlap": round(overlap, 3),
-            "margin": round(margin, 3),
-            # Where the two disagree: ours-without-theirs is a match we credited to this player
-            # that the account was not in, and vice versa. Each one is a roster worth checking.
-            "we_have_they_dont": sorted(ours - theirs),
-            "they_have_we_dont": sorted(theirs - ours),
+    players, review = {}, {}
+    for name, counts in sorted(by_name.items()):
+        total = sum(counts.values())
+        ranked = counts.most_common()
+        adopted = [a for a, n in ranked if n / total >= ALT_ADOPT_SHARE]
+        thin = [{"account_id": a, "votes": n} for a, n in ranked if a not in adopted]
+        players[name] = {
+            "account_ids": adopted,
+            "games_matched": total,
+            "votes": {a: n for a, n in ranked},
         }
-        if kind == "unresolved":
-            # Blank the greedy pick. It won the tie-break by iteration order rather than by
-            # evidence, and left in place it reads like an answer - the one thing a reviewer
-            # must not take on trust here.
-            entry["account_id"] = None
-            ranked = sorted(
-                (round(jaccard(ours, t), 3), a) for a, t in accounts.items() if ours & t
-            )
-            entry["candidates"] = [
-                {"account_id": a, "overlap": s} for s, a in ranked[::-1][:5]
-            ]
-            unresolved[name] = entry
-        else:
-            entry["confidence"] = kind
-            proposals[name] = entry
+        if thin:
+            # Too few votes to adopt outright: either a genuine alt played once, or one
+            # mis-paired row. Cheap to confirm by eye, expensive to get silently wrong.
+            review[name] = {"adopted": adopted, "too_thin_to_adopt": thin}
+
+    # One account answering to two nicknames is one person recorded as two - an alias change we
+    # never noticed. Worth surfacing loudly: it is the exact failure this whole change exists
+    # to end, and merging them is a decision only a human should make.
+    aliases = {
+        account_id: dict(names.most_common())
+        for account_id, names in by_account.items() if len(names) > 1
+    }
 
     all_names = {p["player"] for m in matches for p in m["players"]}
     return {
-        "_readme": "Review `unresolved` and fill in each `account_id` by hand, then apply. "
-                   "Entries with a non-empty `we_have_they_dont` are worth checking even when "
-                   "confident: each is a match whose roster disagrees with the API.",
-        "proposals": proposals,
-        "unresolved": unresolved,
-        # Everyone who only ever appears in matches the API does not have. No account_id exists
-        # to find, so they stay locally keyed until an imported match turns one up.
-        "local_only": sorted(all_names - set(names)),
+        "_readme": "Review `alias_conflicts` first - each is one account recorded under two "
+                   "nicknames. Then `review`, where an account had too few votes to adopt as "
+                   "an alt. `local_only` players have never appeared in a match the API has, "
+                   "so no account_id exists for them yet.",
+        "players": players,
+        "alias_conflicts": aliases,
+        "review": review,
+        "local_only": sorted(all_names - set(by_name)),
+        "_stats": {"rows_dropped_as_unmatchable": dropped},
     }
 
 
 def main():
     matches = data_io.load_matches()
-    api = fetch_account_ids([m["match_id"] for m in matches])
+    api = deadlock_api.match_players_cached([m["match_id"] for m in matches], CACHE_FILE)
     visible = sum(1 for v in api.values() if v)
     print(f"{visible}/{len(matches)} matches are in the API; {len(matches) - visible} are "
           f"custom lobbies it never ingested.\n")
@@ -210,19 +170,28 @@ def main():
     with open(PROPOSAL_FILE, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=1)
 
-    proposals, unresolved = out["proposals"], out["unresolved"]
-    confident = sum(1 for p in proposals.values() if p["confidence"] == "confident")
-    print(f"  {confident:3d} confident")
-    print(f"  {len(proposals) - confident:3d} probable    (worth a glance)")
-    print(f"  {len(unresolved):3d} unresolved  (needs a human - candidates listed)")
+    players = out["players"]
+    with_alts = [n for n, p in players.items() if len(p["account_ids"]) > 1]
+    print(f"  {len(players):3d} nicknames resolved to an account")
+    print(f"  {len(with_alts):3d} of them on more than one account")
     print(f"  {len(out['local_only']):3d} local only  (never in an API match, no account_id exists)")
+    print(f"  {out['_stats']['rows_dropped_as_unmatchable']:3d} rows too unlike anything to pair")
 
-    disagreements = {n: p for n, p in proposals.items() if p["we_have_they_dont"]}
-    if disagreements:
-        print("\nRoster disagreements - our entry vs. the API, worth checking by hand:")
-        for name, p in sorted(disagreements.items(), key=lambda kv: -len(kv[1]["we_have_they_dont"])):
-            ids = ", ".join(p["we_have_they_dont"])
-            print(f"  {name:24s} overlap {p['overlap']:.2f}  match {ids}")
+    if with_alts:
+        print("\nPlayers on more than one account:")
+        for name in sorted(with_alts, key=lambda n: -players[n]["games_matched"]):
+            votes = ", ".join(f"{a} x{n}" for a, n in players[name]["votes"].items())
+            print(f"  {name:24s} {votes}")
+
+    if out["alias_conflicts"]:
+        print("\nOne account, two nicknames - the same person recorded twice:")
+        for account_id, names in out["alias_conflicts"].items():
+            shown = ", ".join(f"{n} x{c}" for n, c in names.items())
+            print(f"  account {account_id}: {shown}")
+
+    if out["review"]:
+        print(f"\n{len(out['review'])} player(s) have an account with too few votes to adopt; "
+              f"see `review` in the proposal.")
 
     print(f"\nWrote {os.path.relpath(PROPOSAL_FILE, ROOT_DIR)}. Nothing else was modified.")
     return 0
