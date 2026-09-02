@@ -1,0 +1,679 @@
+{
+ "_readme": "Review `alias_conflicts` first - each is one account recorded under two nicknames. Then `review`, where an account had too few votes to adopt as an alt. `local_only` players have never appeared in a match the API has, so no account_id exists for them yet.",
+ "players": {
+  "Alex": {
+   "account_ids": [
+    "58081282"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "58081282": 5
+   }
+  },
+  "AntiMatter": {
+   "account_ids": [
+    "176709124"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "176709124": 1
+   }
+  },
+  "AppleSteak": {
+   "account_ids": [
+    "111047502"
+   ],
+   "games_matched": 30,
+   "votes": {
+    "111047502": 30
+   }
+  },
+  "Atlas": {
+   "account_ids": [
+    "206150335"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "206150335": 5
+   }
+  },
+  "Bam": {
+   "account_ids": [
+    "109134972"
+   ],
+   "games_matched": 11,
+   "votes": {
+    "109134972": 11
+   }
+  },
+  "Bethnicz": {
+   "account_ids": [
+    "249577225"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "249577225": 2
+   }
+  },
+  "Bib": {
+   "account_ids": [
+    "1007573047"
+   ],
+   "games_matched": 4,
+   "votes": {
+    "1007573047": 4
+   }
+  },
+  "BigOlMoth": {
+   "account_ids": [
+    "108856081"
+   ],
+   "games_matched": 3,
+   "votes": {
+    "108856081": 3
+   }
+  },
+  "COW-XPLODER": {
+   "account_ids": [
+    "366237709"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "366237709": 5
+   }
+  },
+  "Carbon Dioxide Addict": {
+   "account_ids": [
+    "1052486325"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "1052486325": 2
+   }
+  },
+  "Chocc": {
+   "account_ids": [
+    "107804483"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "107804483": 1
+   }
+  },
+  "Cleared": {
+   "account_ids": [
+    "753622616",
+    "491236160",
+    "732333241"
+   ],
+   "games_matched": 14,
+   "votes": {
+    "753622616": 7,
+    "491236160": 4,
+    "732333241": 3
+   }
+  },
+  "CountryToad": {
+   "account_ids": [
+    "82353518"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "82353518": 1
+   }
+  },
+  "Ctak": {
+   "account_ids": [
+    "112019808"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "112019808": 2
+   }
+  },
+  "Cynder": {
+   "account_ids": [
+    "878876985"
+   ],
+   "games_matched": 6,
+   "votes": {
+    "878876985": 6
+   }
+  },
+  "Cypress": {
+   "account_ids": [
+    "105065651"
+   ],
+   "games_matched": 11,
+   "votes": {
+    "105065651": 11
+   }
+  },
+  "Dane": {
+   "account_ids": [
+    "403545937"
+   ],
+   "games_matched": 20,
+   "votes": {
+    "403545937": 20
+   }
+  },
+  "DefinitlyNotABotBear": {
+   "account_ids": [
+    "290434530"
+   ],
+   "games_matched": 4,
+   "votes": {
+    "290434530": 4
+   }
+  },
+  "Dreman22": {
+   "account_ids": [
+    "168157156"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "168157156": 2
+   }
+  },
+  "Dryxs": {
+   "account_ids": [
+    "113545657"
+   ],
+   "games_matched": 12,
+   "votes": {
+    "113545657": 12
+   }
+  },
+  "Ehko": {
+   "account_ids": [
+    "1421644768"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "1421644768": 1
+   }
+  },
+  "Flow": {
+   "account_ids": [
+    "1200612121",
+    "1870186735"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "1200612121": 3,
+    "1870186735": 2
+   }
+  },
+  "Gavaboo": {
+   "account_ids": [
+    "1853937641"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "1853937641": 1
+   }
+  },
+  "Goth": {
+   "account_ids": [
+    "190806284"
+   ],
+   "games_matched": 8,
+   "votes": {
+    "190806284": 8
+   }
+  },
+  "Hail": {
+   "account_ids": [
+    "114452421"
+   ],
+   "games_matched": 3,
+   "votes": {
+    "114452421": 3
+   }
+  },
+  "Happy Chappy": {
+   "account_ids": [
+    "55354217"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "55354217": 2
+   }
+  },
+  "Jmgoblue": {
+   "account_ids": [
+    "862668582"
+   ],
+   "games_matched": 11,
+   "votes": {
+    "862668582": 11
+   }
+  },
+  "KNyne": {
+   "account_ids": [
+    "30456049"
+   ],
+   "games_matched": 29,
+   "votes": {
+    "30456049": 29
+   }
+  },
+  "Kobbert": {
+   "account_ids": [
+    "84775105"
+   ],
+   "games_matched": 39,
+   "votes": {
+    "84775105": 39
+   }
+  },
+  "Koga": {
+   "account_ids": [
+    "84408942"
+   ],
+   "games_matched": 10,
+   "votes": {
+    "84408942": 10
+   }
+  },
+  "Komodo": {
+   "account_ids": [
+    "1391675063"
+   ],
+   "games_matched": 28,
+   "votes": {
+    "1391675063": 27,
+    "1893621565": 1
+   }
+  },
+  "Kudoh": {
+   "account_ids": [
+    "50797463"
+   ],
+   "games_matched": 15,
+   "votes": {
+    "50797463": 15
+   }
+  },
+  "LawnFlamingo": {
+   "account_ids": [
+    "202782548"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "202782548": 2
+   }
+  },
+  "Lay": {
+   "account_ids": [
+    "312383380",
+    "1844539877"
+   ],
+   "games_matched": 26,
+   "votes": {
+    "312383380": 23,
+    "1844539877": 3
+   }
+  },
+  "Lee Harvey": {
+   "account_ids": [
+    "130927010"
+   ],
+   "games_matched": 20,
+   "votes": {
+    "130927010": 20
+   }
+  },
+  "Maeko": {
+   "account_ids": [
+    "830976701",
+    "151659980",
+    "1740016259"
+   ],
+   "games_matched": 7,
+   "votes": {
+    "830976701": 4,
+    "151659980": 2,
+    "1740016259": 1
+   }
+  },
+  "Micahlele": {
+   "account_ids": [
+    "195606628"
+   ],
+   "games_matched": 4,
+   "votes": {
+    "195606628": 4
+   }
+  },
+  "Mister Unknown": {
+   "account_ids": [
+    "83758398"
+   ],
+   "games_matched": 3,
+   "votes": {
+    "83758398": 3
+   }
+  },
+  "Mori": {
+   "account_ids": [
+    "108135668",
+    "1757176527"
+   ],
+   "games_matched": 9,
+   "votes": {
+    "108135668": 8,
+    "1757176527": 1
+   }
+  },
+  "Naajj": {
+   "account_ids": [
+    "35715439"
+   ],
+   "games_matched": 4,
+   "votes": {
+    "35715439": 4
+   }
+  },
+  "Paulie": {
+   "account_ids": [
+    "72076072"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "72076072": 1
+   }
+  },
+  "Plecostomus Bread": {
+   "account_ids": [
+    "474790176"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "474790176": 2
+   }
+  },
+  "Puddle": {
+   "account_ids": [
+    "98556858"
+   ],
+   "games_matched": 25,
+   "votes": {
+    "98556858": 25
+   }
+  },
+  "Purple": {
+   "account_ids": [
+    "404529275"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "404529275": 1
+   }
+  },
+  "Rainman": {
+   "account_ids": [
+    "106168694",
+    "89978900"
+   ],
+   "games_matched": 19,
+   "votes": {
+    "106168694": 15,
+    "89978900": 3,
+    "1855194496": 1
+   }
+  },
+  "Rogue": {
+   "account_ids": [
+    "74203513"
+   ],
+   "games_matched": 21,
+   "votes": {
+    "74203513": 21
+   }
+  },
+  "Shambles": {
+   "account_ids": [
+    "168207694"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "168207694": 5
+   }
+  },
+  "Shan": {
+   "account_ids": [
+    "1141151250"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "1141151250": 1
+   }
+  },
+  "Siegmeyer": {
+   "account_ids": [
+    "124249807"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "124249807": 1
+   }
+  },
+  "Snortwaffle": {
+   "account_ids": [
+    "87793526"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "87793526": 2
+   }
+  },
+  "SoduhMan": {
+   "account_ids": [
+    "102814434"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "102814434": 5
+   }
+  },
+  "Spades": {
+   "account_ids": [
+    "104212673"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "104212673": 2
+   }
+  },
+  "Sulley": {
+   "account_ids": [
+    "187274453",
+    "1826116850"
+   ],
+   "games_matched": 28,
+   "votes": {
+    "187274453": 25,
+    "1826116850": 3
+   }
+  },
+  "The New Bob": {
+   "account_ids": [
+    "1161806828"
+   ],
+   "games_matched": 5,
+   "votes": {
+    "1161806828": 5
+   }
+  },
+  "TheBigGing": {
+   "account_ids": [
+    "100883133"
+   ],
+   "games_matched": 35,
+   "votes": {
+    "100883133": 35
+   }
+  },
+  "ToastedRainbows": {
+   "account_ids": [
+    "242379785"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "242379785": 1
+   }
+  },
+  "Tris": {
+   "account_ids": [
+    "357001846"
+   ],
+   "games_matched": 7,
+   "votes": {
+    "357001846": 7
+   }
+  },
+  "Vandeer": {
+   "account_ids": [
+    "159858279",
+    "242917883"
+   ],
+   "games_matched": 14,
+   "votes": {
+    "159858279": 12,
+    "242917883": 2
+   }
+  },
+  "Wiggi": {
+   "account_ids": [
+    "85514536"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "85514536": 1
+   }
+  },
+  "Wolfgang": {
+   "account_ids": [
+    "130622921"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "130622921": 2
+   }
+  },
+  "Wonky": {
+   "account_ids": [
+    "1679381193"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "1679381193": 2
+   }
+  },
+  "Wuba": {
+   "account_ids": [
+    "33491428"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "33491428": 1
+   }
+  },
+  "Wurdle": {
+   "account_ids": [
+    "16318483"
+   ],
+   "games_matched": 16,
+   "votes": {
+    "16318483": 16
+   }
+  },
+  "glyde": {
+   "account_ids": [
+    "1128930437"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "1128930437": 1
+   }
+  },
+  "ham": {
+   "account_ids": [
+    "48298304"
+   ],
+   "games_matched": 3,
+   "votes": {
+    "48298304": 3
+   }
+  },
+  "ophianoi": {
+   "account_ids": [
+    "1128930437"
+   ],
+   "games_matched": 1,
+   "votes": {
+    "1128930437": 1
+   }
+  },
+  "saiyafan": {
+   "account_ids": [
+    "198098203"
+   ],
+   "games_matched": 2,
+   "votes": {
+    "198098203": 2
+   }
+  }
+ },
+ "alias_conflicts": {
+  "1128930437": {
+   "ophianoi": 1,
+   "glyde": 1
+  }
+ },
+ "review": {
+  "Komodo": {
+   "adopted": [
+    "1391675063"
+   ],
+   "too_thin_to_adopt": [
+    {
+     "account_id": "1893621565",
+     "votes": 1
+    }
+   ]
+  },
+  "Rainman": {
+   "adopted": [
+    "106168694",
+    "89978900"
+   ],
+   "too_thin_to_adopt": [
+    {
+     "account_id": "1855194496",
+     "votes": 1
+    }
+   ]
+  }
+ },
+ "local_only": [
+  "A.T.",
+  "Ailius",
+  "Ayboii",
+  "Frominican",
+  "Jackawa",
+  "Jayeezy",
+  "Jerry",
+  "Jojo",
+  "Lappland",
+  "Pooch",
+  "Woof Woof",
+  "ash",
+  "metrovictim2008"
+ ],
+ "_stats": {
+  "rows_dropped_as_unmatchable": 4
+ }
+}

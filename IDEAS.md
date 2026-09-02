@@ -7,6 +7,20 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ---
 
+## Open question — ask the group
+
+- [ ] **Who is account `1128930437`?** It played one game as `ophianoi` and one as `glyde`, so
+      it is one person we had been counting as two. The identity migration merged them and kept
+      **ophianoi** as the display name, arbitrarily — nobody has confirmed which name they
+      actually go by, or whether it is a shared account. Fixing it is now a one-field edit:
+      `display_name` on that record. **S**
+- [ ] **Confirm two single-vote alt accounts.** `Komodo` matched account `1893621565` once out
+      of 28 games and `Rainman` matched `1855194496` once out of 19. Too thin to adopt
+      automatically, so they were left off — either a genuine alt played once, or one
+      mis-paired row. Listed under `review` in `data/identity_proposal.json`. **S**
+
+---
+
 ## Tier 0 — Bugs and papercuts
 
 - [x] **JSON edits didn't survive a restart.** *(done - `utils/github_sync.py`, wired through

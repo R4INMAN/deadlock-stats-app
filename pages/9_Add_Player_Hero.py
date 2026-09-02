@@ -9,7 +9,7 @@ st.set_page_config(page_title="Add Player / Hero", page_icon="assets/ui/puddle_p
 ui.page_header("Add Player / Hero", "Register someone new before their first game.")
 ui.storage_notice()
 
-players = data_io.load_players()
+players = data_io.players_by_name()
 heroes = data_io.load_heroes()
 
 col1, col2 = st.columns(2)

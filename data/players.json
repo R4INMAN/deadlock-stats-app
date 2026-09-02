@@ -1,333 +1,936 @@
 {
+  "1007573047": {
+    "display_name": "Bib",
+    "account_ids": [
+      "1007573047"
+    ],
+    "aliases": [
+      "Bib"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 2"
+  },
+  "100883133": {
+    "display_name": "TheBigGing",
+    "account_ids": [
+      "100883133"
+    ],
+    "aliases": [
+      "TheBigGing"
+    ],
+    "notes": "1st place - gold, 2nd place - silver, 3rd place - bronze but I can't do colours so it's light red",
+    "reported_rank": "Phantom 1"
+  },
+  "102814434": {
+    "display_name": "SoduhMan",
+    "account_ids": [
+      "102814434"
+    ],
+    "aliases": [
+      "SoduhMan"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "104212673": {
+    "display_name": "Spades",
+    "account_ids": [
+      "104212673"
+    ],
+    "aliases": [
+      "Spades"
+    ],
+    "notes": "",
+    "reported_rank": "Phantom 1"
+  },
+  "105065651": {
+    "display_name": "Cypress",
+    "account_ids": [
+      "105065651"
+    ],
+    "aliases": [
+      "Cypress"
+    ],
+    "notes": "",
+    "reported_rank": "Archon 3"
+  },
+  "1052486325": {
+    "display_name": "Carbon Dioxide Addict",
+    "account_ids": [
+      "1052486325"
+    ],
+    "aliases": [
+      "Carbon Dioxide Addict"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "106168694": {
+    "display_name": "Rainman",
+    "account_ids": [
+      "106168694",
+      "89978900"
+    ],
+    "aliases": [
+      "Rainman"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 4"
+  },
+  "107804483": {
+    "display_name": "Chocc",
+    "account_ids": [
+      "107804483"
+    ],
+    "aliases": [
+      "Chocc"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "108135668": {
+    "display_name": "Mori",
+    "account_ids": [
+      "108135668",
+      "1757176527"
+    ],
+    "aliases": [
+      "Mori"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 6"
+  },
+  "108856081": {
+    "display_name": "BigOlMoth",
+    "account_ids": [
+      "108856081"
+    ],
+    "aliases": [
+      "BigOlMoth"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "109134972": {
+    "display_name": "Bam",
+    "account_ids": [
+      "109134972"
+    ],
+    "aliases": [
+      "Bam"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 2"
+  },
+  "111047502": {
+    "display_name": "AppleSteak",
+    "account_ids": [
+      "111047502"
+    ],
+    "aliases": [
+      "AppleSteak"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 2"
+  },
+  "112019808": {
+    "display_name": "Ctak",
+    "account_ids": [
+      "112019808"
+    ],
+    "aliases": [
+      "Ctak"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "1128930437": {
+    "display_name": "ophianoi",
+    "account_ids": [
+      "1128930437"
+    ],
+    "aliases": [
+      "glyde",
+      "ophianoi"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "113545657": {
+    "display_name": "Dryxs",
+    "account_ids": [
+      "113545657"
+    ],
+    "aliases": [
+      "Dryxs"
+    ],
+    "notes": "",
+    "reported_rank": "Oracle 3"
+  },
+  "1141151250": {
+    "display_name": "Shan",
+    "account_ids": [
+      "1141151250"
+    ],
+    "aliases": [
+      "Shan"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 2"
+  },
+  "114452421": {
+    "display_name": "Hail",
+    "account_ids": [
+      "114452421"
+    ],
+    "aliases": [
+      "Hail"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 6"
+  },
+  "1161806828": {
+    "display_name": "The New Bob",
+    "account_ids": [
+      "1161806828"
+    ],
+    "aliases": [
+      "The New Bob"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "1200612121": {
+    "display_name": "Flow",
+    "account_ids": [
+      "1200612121",
+      "1870186735"
+    ],
+    "aliases": [
+      "Flow"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 1"
+  },
+  "124249807": {
+    "display_name": "Siegmeyer",
+    "account_ids": [
+      "124249807"
+    ],
+    "aliases": [
+      "Siegmeyer"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "130622921": {
+    "display_name": "Wolfgang",
+    "account_ids": [
+      "130622921"
+    ],
+    "aliases": [
+      "Wolfgang"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "130927010": {
+    "display_name": "Lee Harvey",
+    "account_ids": [
+      "130927010"
+    ],
+    "aliases": [
+      "Lee Harvey"
+    ],
+    "notes": "",
+    "reported_rank": "Phantom 6"
+  },
+  "1391675063": {
+    "display_name": "Komodo",
+    "account_ids": [
+      "1391675063"
+    ],
+    "aliases": [
+      "Komodo"
+    ],
+    "notes": "Placements are done for players with >= 3 games",
+    "reported_rank": "Oracle 3"
+  },
+  "1421644768": {
+    "display_name": "Ehko",
+    "account_ids": [
+      "1421644768"
+    ],
+    "aliases": [
+      "Ehko"
+    ],
+    "notes": "",
+    "reported_rank": "Emissary 1"
+  },
+  "159858279": {
+    "display_name": "Vandeer",
+    "account_ids": [
+      "159858279",
+      "242917883"
+    ],
+    "aliases": [
+      "Vandeer"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 3"
+  },
+  "16318483": {
+    "display_name": "Wurdle",
+    "account_ids": [
+      "16318483"
+    ],
+    "aliases": [
+      "Wurdle"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "1679381193": {
+    "display_name": "Wonky",
+    "account_ids": [
+      "1679381193"
+    ],
+    "aliases": [
+      "Wonky"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "168157156": {
+    "display_name": "Dreman22",
+    "account_ids": [
+      "168157156"
+    ],
+    "aliases": [
+      "Dreman22"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "168207694": {
+    "display_name": "Shambles",
+    "account_ids": [
+      "168207694"
+    ],
+    "aliases": [
+      "Shambles"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 3"
+  },
+  "176709124": {
+    "display_name": "AntiMatter",
+    "account_ids": [
+      "176709124"
+    ],
+    "aliases": [
+      "AntiMatter"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "1853937641": {
+    "display_name": "Gavaboo",
+    "account_ids": [
+      "1853937641"
+    ],
+    "aliases": [
+      "Gavaboo"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "187274453": {
+    "display_name": "Sulley",
+    "account_ids": [
+      "187274453",
+      "1826116850"
+    ],
+    "aliases": [
+      "Sulley"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 3"
+  },
+  "190806284": {
+    "display_name": "Goth",
+    "account_ids": [
+      "190806284"
+    ],
+    "aliases": [
+      "Goth"
+    ],
+    "notes": "",
+    "reported_rank": "Archon 6"
+  },
+  "195606628": {
+    "display_name": "Micahlele",
+    "account_ids": [
+      "195606628"
+    ],
+    "aliases": [
+      "Micahlele"
+    ],
+    "notes": "",
+    "reported_rank": "Phantom 6"
+  },
+  "198098203": {
+    "display_name": "saiyafan",
+    "account_ids": [
+      "198098203"
+    ],
+    "aliases": [
+      "saiyafan"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "202782548": {
+    "display_name": "LawnFlamingo",
+    "account_ids": [
+      "202782548"
+    ],
+    "aliases": [
+      "LawnFlamingo"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 1"
+  },
+  "206150335": {
+    "display_name": "Atlas",
+    "account_ids": [
+      "206150335"
+    ],
+    "aliases": [
+      "Atlas"
+    ],
+    "notes": "",
+    "reported_rank": "Emissary 3"
+  },
+  "242379785": {
+    "display_name": "ToastedRainbows",
+    "account_ids": [
+      "242379785"
+    ],
+    "aliases": [
+      "ToastedRainbows"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "249577225": {
+    "display_name": "Bethnicz",
+    "account_ids": [
+      "249577225"
+    ],
+    "aliases": [
+      "Bethnicz"
+    ],
+    "notes": "Last placement update: 2026/03/25",
+    "reported_rank": null
+  },
+  "290434530": {
+    "display_name": "DefinitlyNotABotBear",
+    "account_ids": [
+      "290434530"
+    ],
+    "aliases": [
+      "DefinitlyNotABotBear"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "30456049": {
+    "display_name": "KNyne",
+    "account_ids": [
+      "30456049"
+    ],
+    "aliases": [
+      "KNyne"
+    ],
+    "notes": "Placements are done manually, might not be updated if new pugs are added",
+    "reported_rank": "Ascendant 1"
+  },
+  "312383380": {
+    "display_name": "Lay",
+    "account_ids": [
+      "312383380",
+      "1844539877"
+    ],
+    "aliases": [
+      "Lay"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 1"
+  },
+  "33491428": {
+    "display_name": "Wuba",
+    "account_ids": [
+      "33491428"
+    ],
+    "aliases": [
+      "Wuba"
+    ],
+    "notes": "",
+    "reported_rank": "Ritualist 1"
+  },
+  "357001846": {
+    "display_name": "Tris",
+    "account_ids": [
+      "357001846"
+    ],
+    "aliases": [
+      "Tris"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "35715439": {
+    "display_name": "Naajj",
+    "account_ids": [
+      "35715439"
+    ],
+    "aliases": [
+      "Naajj"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 2"
+  },
+  "366237709": {
+    "display_name": "COW-XPLODER",
+    "account_ids": [
+      "366237709"
+    ],
+    "aliases": [
+      "COW-XPLODER"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 1"
+  },
+  "403545937": {
+    "display_name": "Dane",
+    "account_ids": [
+      "403545937"
+    ],
+    "aliases": [
+      "Dane"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 6"
+  },
+  "404529275": {
+    "display_name": "Purple",
+    "account_ids": [
+      "404529275"
+    ],
+    "aliases": [
+      "Purple"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "474790176": {
+    "display_name": "Plecostomus Bread",
+    "account_ids": [
+      "474790176"
+    ],
+    "aliases": [
+      "Plecostomus Bread"
+    ],
+    "notes": "",
+    "reported_rank": "Arcanist 4"
+  },
+  "48298304": {
+    "display_name": "ham",
+    "account_ids": [
+      "48298304"
+    ],
+    "aliases": [
+      "ham"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "50797463": {
+    "display_name": "Kudoh",
+    "account_ids": [
+      "50797463"
+    ],
+    "aliases": [
+      "Kudoh"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "55354217": {
+    "display_name": "Happy Chappy",
+    "account_ids": [
+      "55354217"
+    ],
+    "aliases": [
+      "Happy Chappy"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "58081282": {
+    "display_name": "Alex",
+    "account_ids": [
+      "58081282"
+    ],
+    "aliases": [
+      "Alex"
+    ],
+    "notes": "",
+    "reported_rank": "Ascendant 5"
+  },
+  "72076072": {
+    "display_name": "Paulie",
+    "account_ids": [
+      "72076072"
+    ],
+    "aliases": [
+      "Paulie"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "74203513": {
+    "display_name": "Rogue",
+    "account_ids": [
+      "74203513"
+    ],
+    "aliases": [
+      "Rogue"
+    ],
+    "notes": "",
+    "reported_rank": "Phantom 4"
+  },
+  "753622616": {
+    "display_name": "Cleared",
+    "account_ids": [
+      "753622616",
+      "491236160",
+      "732333241"
+    ],
+    "aliases": [
+      "Cleared"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "82353518": {
+    "display_name": "CountryToad",
+    "account_ids": [
+      "82353518"
+    ],
+    "aliases": [
+      "CountryToad"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 2"
+  },
+  "830976701": {
+    "display_name": "Maeko",
+    "account_ids": [
+      "830976701",
+      "151659980",
+      "1740016259"
+    ],
+    "aliases": [
+      "Maeko"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 6"
+  },
+  "83758398": {
+    "display_name": "Mister Unknown",
+    "account_ids": [
+      "83758398"
+    ],
+    "aliases": [
+      "Mister Unknown"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "84408942": {
+    "display_name": "Koga",
+    "account_ids": [
+      "84408942"
+    ],
+    "aliases": [
+      "Koga"
+    ],
+    "notes": "",
+    "reported_rank": "Emissary 5"
+  },
+  "84775105": {
+    "display_name": "Kobbert",
+    "account_ids": [
+      "84775105"
+    ],
+    "aliases": [
+      "Kobbert"
+    ],
+    "notes": "",
+    "reported_rank": "Phantom 4"
+  },
+  "85514536": {
+    "display_name": "Wiggi",
+    "account_ids": [
+      "85514536"
+    ],
+    "aliases": [
+      "Wiggi"
+    ],
+    "notes": "",
+    "reported_rank": "Oracle 3"
+  },
+  "862668582": {
+    "display_name": "Jmgoblue",
+    "account_ids": [
+      "862668582"
+    ],
+    "aliases": [
+      "Jmgoblue"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "87793526": {
+    "display_name": "Snortwaffle",
+    "account_ids": [
+      "87793526"
+    ],
+    "aliases": [
+      "Snortwaffle"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "878876985": {
+    "display_name": "Cynder",
+    "account_ids": [
+      "878876985"
+    ],
+    "aliases": [
+      "Cynder"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "98556858": {
+    "display_name": "Puddle",
+    "account_ids": [
+      "98556858"
+    ],
+    "aliases": [
+      "Puddle"
+    ],
+    "notes": "",
+    "reported_rank": "Eternus 1"
+  },
   "A.T.": {
+    "display_name": "A.T.",
+    "account_ids": [],
+    "aliases": [
+      "A.T."
+    ],
     "notes": "",
     "reported_rank": null
   },
   "Ailius": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Alex": {
-    "notes": "",
-    "reported_rank": "Ascendant 5"
-  },
-  "AntiMatter": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "AppleSteak": {
-    "notes": "",
-    "reported_rank": "Eternus 2"
-  },
-  "Atlas": {
-    "notes": "",
-    "reported_rank": "Emissary 3"
-  },
-  "Ayboii": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Bam": {
-    "notes": "",
-    "reported_rank": "Ascendant 2"
-  },
-  "Bethnicz": {
-    "notes": "Last placement update: 2026/03/25",
-    "reported_rank": null
-  },
-  "Bib": {
-    "notes": "",
-    "reported_rank": "Eternus 2"
-  },
-  "BigOlMoth": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "COW-XPLODER": {
-    "notes": "",
-    "reported_rank": "Ascendant 1"
-  },
-  "Carbon Dioxide Addict": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Catalyst": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Chocc": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "CountryToad": {
-    "notes": "",
-    "reported_rank": "Eternus 2"
-  },
-  "Ctak": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Cynder": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Cypress": {
-    "notes": "",
-    "reported_rank": "Archon 3"
-  },
-  "DMinatrix": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Dane": {
-    "notes": "",
-    "reported_rank": "Ascendant 6"
-  },
-  "Danny": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "DefinitlyNotABotBear": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Dreman22": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Dryxs": {
-    "notes": "",
-    "reported_rank": "Oracle 3"
-  },
-  "Ehko": {
-    "notes": "",
-    "reported_rank": "Emissary 1"
-  },
-  "Flow": {
-    "notes": "",
-    "reported_rank": "Ascendant 1"
-  },
-  "Frominican": {
-    "notes": "",
-    "reported_rank": "Phantom 2"
-  },
-  "Gavaboo": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Goth": {
-    "notes": "",
-    "reported_rank": "Archon 6"
-  },
-  "Hail": {
-    "notes": "",
-    "reported_rank": "Eternus 6"
-  },
-  "Happy Chappy": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Jackawa": {
-    "notes": "",
-    "reported_rank": "Archon 5"
-  },
-  "Jayeezy": {
-    "notes": "",
-    "reported_rank": "Oracle 3"
-  },
-  "Jerry": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Jmgoblue": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Jojo": {
-    "notes": "",
-    "reported_rank": "Ritualist 1"
-  },
-  "Kobbert": {
-    "notes": "",
-    "reported_rank": "Phantom 4"
-  },
-  "Koga": {
-    "notes": "",
-    "reported_rank": "Emissary 5"
-  },
-  "Komodo": {
-    "notes": "Placements are done for players with >= 3 games",
-    "reported_rank": "Oracle 3"
-  },
-  "Kudoh": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Lappland": {
-    "notes": "",
-    "reported_rank": "Archon 4"
-  },
-  "LawnFlamingo": {
-    "notes": "",
-    "reported_rank": "Ascendant 1"
-  },
-  "Lay": {
-    "notes": "",
-    "reported_rank": "Eternus 1"
-  },
-  "Lee Harvey": {
-    "notes": "",
-    "reported_rank": "Phantom 6"
-  },
-  "Maeko": {
-    "notes": "",
-    "reported_rank": "Eternus 6"
-  },
-  "Micahlele": {
-    "notes": "",
-    "reported_rank": "Phantom 6"
-  },
-  "Mister Unknown": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Mori": {
-    "notes": "",
-    "reported_rank": "Eternus 6"
-  },
-  "Naajj": {
-    "notes": "",
-    "reported_rank": "Ascendant 2"
-  },
-  "Paulie": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Plecostomus Bread": {
-    "notes": "",
-    "reported_rank": "Arcanist 4"
-  },
-  "Pooch": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Puddle": {
-    "notes": "",
-    "reported_rank": "Eternus 1"
-  },
-  "Purple": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Rainman": {
-    "notes": "",
-    "reported_rank": "Ascendant 4"
-  },
-  "Rogue": {
-    "notes": "",
-    "reported_rank": "Phantom 4"
-  },
-  "Shambles": {
-    "notes": "",
-    "reported_rank": "Ascendant 3"
-  },
-  "Shan": {
-    "notes": "",
-    "reported_rank": "Ascendant 2"
-  },
-  "Siegmeyer": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Snortwaffle": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "SoduhMan": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Spades": {
-    "notes": "",
-    "reported_rank": "Phantom 1"
-  },
-  "Sulley": {
-    "notes": "",
-    "reported_rank": "Ascendant 3"
-  },
-  "The New Bob": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "TheBigGing": {
-    "notes": "1st place - gold, 2nd place - silver, 3rd place - bronze but I can't do colours so it's light red",
-    "reported_rank": "Phantom 1"
-  },
-  "ToastedRainbows": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Tris": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Vandeer": {
-    "notes": "",
-    "reported_rank": "Eternus 3"
-  },
-  "Wiggi": {
-    "notes": "",
-    "reported_rank": "Oracle 3"
-  },
-  "Wolfgang": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Wonky": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Woof Woof": {
-    "notes": "",
-    "reported_rank": null
-  },
-  "Wuba": {
-    "notes": "",
-    "reported_rank": "Ritualist 1"
-  },
-  "Wurdle": {
+    "display_name": "Ailius",
+    "account_ids": [],
+    "aliases": [
+      "Ailius"
+    ],
     "notes": "",
     "reported_rank": null
   },
   "Ash": {
+    "display_name": "Ash",
+    "account_ids": [],
+    "aliases": [
+      "Ash"
+    ],
     "notes": "",
     "reported_rank": null
   },
-  "Cleared": {
+  "Ayboii": {
+    "display_name": "Ayboii",
+    "account_ids": [],
+    "aliases": [
+      "Ayboii"
+    ],
     "notes": "",
     "reported_rank": null
+  },
+  "Catalyst": {
+    "display_name": "Catalyst",
+    "account_ids": [],
+    "aliases": [
+      "Catalyst"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "DMinatrix": {
+    "display_name": "DMinatrix",
+    "account_ids": [],
+    "aliases": [
+      "DMinatrix"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "Danny": {
+    "display_name": "Danny",
+    "account_ids": [],
+    "aliases": [
+      "Danny"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "Frominican": {
+    "display_name": "Frominican",
+    "account_ids": [],
+    "aliases": [
+      "Frominican"
+    ],
+    "notes": "",
+    "reported_rank": "Phantom 2"
   },
   "Glyde": {
+    "display_name": "Glyde",
+    "account_ids": [],
+    "aliases": [
+      "Glyde"
+    ],
     "notes": "",
     "reported_rank": null
   },
   "Ham": {
+    "display_name": "Ham",
+    "account_ids": [],
+    "aliases": [
+      "Ham"
+    ],
     "notes": "",
     "reported_rank": null
   },
-  "KNyne": {
-    "notes": "Placements are done manually, might not be updated if new pugs are added",
-    "reported_rank": "Ascendant 1"
+  "Jackawa": {
+    "display_name": "Jackawa",
+    "account_ids": [],
+    "aliases": [
+      "Jackawa"
+    ],
+    "notes": "",
+    "reported_rank": "Archon 5"
+  },
+  "Jayeezy": {
+    "display_name": "Jayeezy",
+    "account_ids": [],
+    "aliases": [
+      "Jayeezy"
+    ],
+    "notes": "",
+    "reported_rank": "Oracle 3"
+  },
+  "Jerry": {
+    "display_name": "Jerry",
+    "account_ids": [],
+    "aliases": [
+      "Jerry"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "Jojo": {
+    "display_name": "Jojo",
+    "account_ids": [],
+    "aliases": [
+      "Jojo"
+    ],
+    "notes": "",
+    "reported_rank": "Ritualist 1"
+  },
+  "Lappland": {
+    "display_name": "Lappland",
+    "account_ids": [],
+    "aliases": [
+      "Lappland"
+    ],
+    "notes": "",
+    "reported_rank": "Archon 4"
   },
   "Metrovictim2008": {
+    "display_name": "Metrovictim2008",
+    "account_ids": [],
+    "aliases": [
+      "Metrovictim2008"
+    ],
     "notes": "",
     "reported_rank": null
   },
   "Ophianoi": {
+    "display_name": "Ophianoi",
+    "account_ids": [],
+    "aliases": [
+      "Ophianoi"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "Pooch": {
+    "display_name": "Pooch",
+    "account_ids": [],
+    "aliases": [
+      "Pooch"
+    ],
     "notes": "",
     "reported_rank": null
   },
   "Saiyafan": {
+    "display_name": "Saiyafan",
+    "account_ids": [],
+    "aliases": [
+      "Saiyafan"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "Woof Woof": {
+    "display_name": "Woof Woof",
+    "account_ids": [],
+    "aliases": [
+      "Woof Woof"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "ash": {
+    "display_name": "ash",
+    "account_ids": [],
+    "aliases": [
+      "ash"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "metrovictim2008": {
+    "display_name": "metrovictim2008",
+    "account_ids": [],
+    "aliases": [
+      "metrovictim2008"
+    ],
     "notes": "",
     "reported_rank": null
   }
