@@ -6,7 +6,7 @@ st.set_page_config(page_title="Player Stats", page_icon="assets/ui/puddle_punch.
 ui.page_header("Player Stats", "Who shows up, who wins, and who they show up as.")
 
 matches = data_io.load_matches()
-players = data_io.load_players()
+players = data_io.players_by_name()
 ranks = data_io.load_ranks()
 
 if not matches:

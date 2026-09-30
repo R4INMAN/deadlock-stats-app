@@ -7,7 +7,7 @@ st.set_page_config(page_title="Player Cards", page_icon="🪪", layout="wide")
 st.title("🪪 Player Cards")
 
 matches = data_io.load_matches()
-players = data_io.load_players()
+players = data_io.players_by_name()
 ranks = data_io.load_ranks()
 visuals = data_io.load_hero_visuals()
 

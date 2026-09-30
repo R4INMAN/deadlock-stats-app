@@ -429,13 +429,19 @@ def test_an_outage_does_not_refetch_on_every_render():
 
     for _ in range(10):
         assert dio.load_matches(), "must still serve the committed fallback"
-    assert len(attempts) == 1, f"retried the network {len(attempts)} times during an outage"
+    # One attempt per file, never a second for the same one. load_matches() reads players.json
+    # too - it resolves display names from player_key - so the count is per distinct file
+    # rather than a flat 1; what must not happen is the same file being retried per render.
+    assert len(attempts) == len(set(attempts)), (
+        f"retried a file during an outage: {sorted(attempts)}")
+    assert len(attempts) <= 2, f"load_matches touched {len(attempts)} files, expected at most 2"
     assert dio.storage_status()[0] == "degraded"
 
-    # ...and it recovers once the TTL lapses.
+    # ...and it recovers once the TTLs lapse. Every stale file has to lapse, not just one:
+    # storage_status stays degraded while any file is still being served from the fallback.
     with dio._cache_lock:
-        path, (msg, _) = next(iter(dio._stale.items()))
-        dio._stale[path] = (msg, 0)
+        for path, (msg, _) in list(dio._stale.items()):
+            dio._stale[path] = (msg, 0)
     gs.requests = type("R", (), {"request": staticmethod(server.request),
                                  "RequestException": Exception})
     dio.load_matches()
