@@ -24,7 +24,7 @@ streamlit run Home.py
 - `fetch_deadlock_assets.py` — re-run to refresh vendored art and colors when Valve adds or reworks heroes
 - `scripts/check_sync.py` — verify the app can read and write its data store
 - `scripts/refresh_fallback.py` — refresh main's fallback copy of `data/*.json` from the `data` branch
-- `tests/` — two plain scripts, no runner to install; see **Tests**
+- `tests/` — three plain scripts, no runner to install; see **Tests**
 - `convert_csv.py` — the one-time import script that built data/*.json from your old Google Sheet CSVs (kept for reference, not needed to run the app)
 
 Your 82 historical matches, 83 players, and 38 heroes are already imported.
@@ -92,11 +92,12 @@ python scripts/check_sync.py --write   # can it write?
 
 ## Tests
 
-No test runner to install - both are plain scripts:
+No test runner to install - all three are plain scripts:
 
 ```
 python tests/test_github_sync.py    # the conditional-write path, against a fake contents API
 python tests/test_pages_render.py   # every page renders without raising, against real data
+python tests/test_edit_form.py      # editing a match loads that match, and saving keeps the rest
 ```
 
 ## Art and theming

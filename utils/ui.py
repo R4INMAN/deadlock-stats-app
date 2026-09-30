@@ -271,6 +271,32 @@ def storage_notice():
         )
 
 
+def stop_if_stale():
+    """Halt an edit page whose data could not be read live. Call it after `storage_notice()`.
+
+    A form you cannot save is worse than no form: the reason the read failed - an expired
+    token, a wrong branch, GitHub down - is the same reason the write is about to be rejected,
+    so the page would take twelve players' worth of typing and then throw it away. Editing a
+    stale copy is the more dangerous half anyway: the form is populated from the committed
+    version, so a save built on it would overwrite whatever has been logged since.
+
+    The retry is here rather than a plain reload because the failure is remembered for
+    FAILURE_TTL_SECONDS - dropping the cache is what makes the next run actually ask GitHub.
+    """
+    if data_io.storage_status()[0] != "degraded":
+        return
+
+    st.warning(
+        "**Editing is switched off until that is fixed.** Saving would be rejected by the same "
+        "thing that blocked the read, and a match typed in now would be lost - so the form is "
+        "hidden rather than offered and then refused."
+    )
+    if st.button("Try again"):
+        data_io.invalidate_cache()
+        st.rerun()
+    st.stop()
+
+
 def report_save(action, success_message, celebrate=False):
     """Run a save, and tell the truth about how it went.
 
