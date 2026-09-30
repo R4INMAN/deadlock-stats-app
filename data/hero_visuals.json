@@ -1,154 +1,192 @@
 {
   "Abrams": {
     "color": "#2092AE",
+    "id": 6,
     "portrait": "abrams.png"
   },
   "Apollo": {
     "color": "#FF3333",
+    "id": 77,
     "portrait": "apollo.png"
   },
   "Bebop": {
     "color": "#9F4734",
+    "id": 15,
     "portrait": "bebop.png"
   },
   "Billy": {
     "color": "#D4AD0E",
+    "id": 72,
     "portrait": "billy.png"
   },
   "Calico": {
     "color": "#572798",
+    "id": 16,
     "portrait": "calico.png"
   },
   "Celeste": {
     "color": "#BBA9E1",
+    "id": 81,
     "portrait": "celeste.png"
   },
   "Doorman": {
     "color": "#B77528",
+    "id": 69,
     "portrait": "doorman.png"
   },
   "Drifter": {
     "color": "#9D2C2B",
+    "id": 64,
     "portrait": "drifter.png"
   },
   "Dynamo": {
     "color": "#D0B945",
+    "id": 11,
     "portrait": "dynamo.png"
   },
   "Graves": {
     "color": "#D9F334",
+    "id": 76,
     "portrait": "graves.png"
   },
   "Grey Talon": {
     "color": "#5EB083",
+    "id": 17,
     "portrait": "greytalon.png"
   },
   "Haze": {
     "color": "#AC6133",
+    "id": 13,
     "portrait": "haze.png"
   },
   "Holliday": {
     "color": "#A35A1B",
+    "id": 14,
     "portrait": "holliday.png"
   },
   "Infernus": {
     "color": "#C93C26",
+    "id": 1,
     "portrait": "infernus.png"
   },
   "Ivy": {
     "color": "#9D8CA9",
+    "id": 20,
     "portrait": "ivy.png"
   },
   "Kelvin": {
     "color": "#74ABBC",
+    "id": 12,
     "portrait": "kelvin.png"
   },
   "Lady Geist": {
     "color": "#218440",
+    "id": 4,
     "portrait": "ladygeist.png"
   },
   "Lash": {
     "color": "#4174BB",
+    "id": 31,
     "portrait": "lash.png"
   },
   "McGinnis": {
     "color": "#23549D",
+    "id": 8,
     "portrait": "mcginnis.png"
   },
   "Mina": {
     "color": "#A9171E",
+    "id": 63,
     "portrait": "mina.png"
   },
   "Mirage": {
     "color": "#6A2E68",
+    "id": 52,
     "portrait": "mirage.png"
   },
   "Mo and Krill": {
     "color": "#C58428",
+    "id": 18,
     "portrait": "moandkrill.png"
   },
   "Paige": {
     "color": "#258F63",
+    "id": 67,
     "portrait": "paige.png"
   },
   "Paradox": {
     "color": "#983952",
+    "id": 10,
     "portrait": "paradox.png"
   },
   "Pocket": {
     "color": "#858617",
+    "id": 50,
     "portrait": "pocket.png"
   },
   "Rem": {
     "color": "#5383D1",
+    "id": 79,
     "portrait": "rem.png"
   },
   "Seven": {
     "color": "#CC861E",
+    "id": 2,
     "portrait": "seven.png"
   },
   "Shiv": {
     "color": "#E52A68",
+    "id": 19,
     "portrait": "shiv.png"
   },
   "Silver": {
     "color": "#BFBC9F",
+    "id": 80,
     "portrait": "silver.png"
   },
   "Sinclair": {
     "color": "#6B6B6B",
+    "id": 60,
     "portrait": "sinclair.png"
   },
   "Venator": {
     "color": "#BD3599",
+    "id": 65,
     "portrait": "venator.png"
   },
   "Victor": {
     "color": "#658B6F",
+    "id": 66,
     "portrait": "victor.png"
   },
   "Vindicta": {
     "color": "#A2C7E5",
+    "id": 3,
     "portrait": "vindicta.png"
   },
   "Viscous": {
     "color": "#319826",
+    "id": 35,
     "portrait": "viscous.png"
   },
   "Vyper": {
     "color": "#A7AD00",
+    "id": 58,
     "portrait": "vyper.png"
   },
   "Warden": {
     "color": "#4D68A3",
+    "id": 25,
     "portrait": "warden.png"
   },
   "Wraith": {
     "color": "#944D78",
+    "id": 7,
     "portrait": "wraith.png"
   },
   "Yamato": {
     "color": "#625789",
+    "id": 27,
     "portrait": "yamato.png"
   }
 }

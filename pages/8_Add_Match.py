@@ -1,6 +1,6 @@
 import datetime
 import streamlit as st
-from utils import data_io, dates, ui
+from utils import data_io, dates, deadlock_api, ui
 from utils.auth import require_edit_access
 
 st.set_page_config(page_title="Add Match", page_icon="assets/ui/puddle_punch.png", layout="wide")
@@ -57,6 +57,44 @@ if editing:
     edit_id = st.selectbox("Select match to edit", match_ids)
     existing_match = next(m for m in matches if m["match_id"] == edit_id)
 
+# ---------------- IMPORT (Add mode only) ----------------
+# Fetching fills the form rather than saving: bans and first picks never reach the API (we draft
+# on statlocker), and whoever is logging should still see the numbers before they go in. It also
+# makes losing the form cheap - go add a missing player, come back, fetch again.
+imported = None
+if not editing:
+    with st.container(border=True):
+        c1, c2 = st.columns([4, 1], vertical_alignment="bottom")
+        fetch_id = c1.text_input("Fetch from match ID",
+                                 help="Fills in heroes, teams, K/D/A, souls, damage, healing, "
+                                      "length, date, winner, MVP and Key Players from the "
+                                      "Deadlock API. Bans and first picks still need entering.")
+        if c2.button("Fetch", width="stretch") and fetch_id.strip():
+            fetch_id = fetch_id.strip()
+            if any(m["match_id"] == fetch_id for m in matches):
+                st.session_state.pop("imported_match", None)
+                st.warning(f"Match {fetch_id} is already logged - use **Edit Match** to change it.")
+            else:
+                with st.spinner("Asking the Deadlock API..."):
+                    info = deadlock_api.match_info(fetch_id)
+                if info is None:
+                    st.session_state.pop("imported_match", None)
+                    st.error(f"The API doesn't have match {fetch_id}. Custom lobbies are sometimes "
+                             f"never picked up - check the ID, or enter this one by hand below.")
+                else:
+                    st.session_state["imported_match"] = deadlock_api.to_match(
+                        info, data_io.load_players(), heroes)
+        imported = st.session_state.get("imported_match")
+        if imported:
+            st.success(f"Loaded match {imported['match_id']} - check it over, add bans and "
+                       f"first picks, then save.")
+            if st.button("Clear and enter by hand"):
+                st.session_state.pop("imported_match", None)
+                st.rerun()
+
+# What the form opens on: the match being edited, the one just fetched, or nothing.
+prefill = existing_match or imported
+
 # Streamlit keeps a *keyed* widget's value in session state and, from its second run onward,
 # ignores the `index=` / `value=` the script passes. Every box-score field below needs a key -
 # six identical widgets in a row cannot be told apart without one - so the whole box score sat
@@ -65,7 +103,8 @@ if editing:
 # fills in the date but not the heroes", and it is why fixing a date meant retyping 12 players.
 # Naming the keys after the match makes each selection a fresh set of widgets, and a fresh
 # widget does read the default it is given.
-form_scope = f"edit_{edit_id}" if editing else "add"
+form_scope = (f"edit_{edit_id}" if editing
+              else f"import_{imported['match_id']}" if imported else "add")
 
 if len(player_names) < 12:
     st.warning("You need at least 12 players logged (6 per side) before adding a match. Use **Add Player / Hero** first.")
@@ -85,13 +124,27 @@ if existing_match:
             "rewritten with the wrong name."
         )
 
+if imported:
+    unlinked = [r for r in imported["players"] if r["player"] is None]
+    if unlinked:
+        st.info(
+            "**" + ("One account isn't" if len(unlinked) == 1 else f"{len(unlinked)} accounts aren't")
+            + " linked to a player yet** - the empty Player slots below. Pick who each one is and the "
+              "account is remembered for next time. Someone brand new needs adding on **Add Player / "
+              "Hero** first; fetching again afterwards brings everything back."
+        )
+    unknown_heroes = sorted({str(r["hero_id"]) for r in imported["players"] if r["hero"] is None})
+    if unknown_heroes:
+        st.warning(f"Hero id {', '.join(unknown_heroes)} isn't in our hero list - probably a new "
+                   f"release. Add it on **Add Player / Hero**, then run `fetch_deadlock_assets.py`.")
+
 st.caption("Enter all 12 players' stats, then bans, first picks, MVP, and Key Players at the bottom.")
 
 
 def existing_player_row(team, slot_idx):
-    if not existing_match:
+    if not prefill:
         return None
-    team_rows = [p for p in existing_match["players"] if p["team"] == team]
+    team_rows = [p for p in prefill["players"] if p["team"] == team]
     return team_rows[slot_idx] if slot_idx < len(team_rows) else None
 
 
@@ -102,31 +155,39 @@ def idx_of(lst, value, default=0):
         return default
 
 
+def slot_index(lst, row, field):
+    """Pre-selection for a player/hero box. An imported slot we could not identify opens empty,
+    so nobody saves a match with the first name in the list standing in for a stranger."""
+    if imported and row and row[field] is None:
+        return None
+    return idx_of(lst, row[field] if row else None)
+
+
 with st.form("match_form", clear_on_submit=False):
     if editing:
         match_id = existing_match["match_id"]
         st.text_input("Match ID", value=match_id, disabled=True)
     else:
-        match_id = st.text_input("Match ID", value="")
+        match_id = st.text_input("Match ID", value=imported["match_id"] if imported else "")
 
     # Defaults to tonight where the group plays, not where the server runs - but it stays
     # editable, because a match logged the morning after is not a match played that morning.
     # An existing match the backfill has not reached yet opens empty rather than defaulting to
     # today, so editing an old match for some unrelated reason cannot stamp it with this date.
-    if existing_match:
-        stored = existing_match.get("date")
+    if prefill:
+        stored = prefill.get("date")
         default_date = datetime.date.fromisoformat(stored) if stored else None
     else:
         default_date = dates.today()
     match_date = st.date_input("Date played", value=default_date,
                                help="The night the match was played.")
 
-    default_length = existing_match["game_length"] if existing_match else "30:00"
+    default_length = prefill["game_length"] if prefill else "30:00"
     game_length = st.text_input("Game length (MM:SS)", value=default_length)
 
     default_winner = TEAM_A
-    if existing_match:
-        winners = [p["team"] for p in existing_match["players"] if p["win"]]
+    if prefill:
+        winners = [p["team"] for p in prefill["players"] if p["win"]]
         if winners:
             default_winner = winners[0]
     winning_side = st.radio("Winning side", [TEAM_A, TEAM_B], horizontal=True,
@@ -149,12 +210,14 @@ with st.form("match_form", clear_on_submit=False):
 
         players_sel = field_row("Player", "player", lambda i, c: st.selectbox(
             "Player", player_names,
-            index=idx_of(player_names, team_existing[i]["player"] if team_existing[i] else None),
+            index=slot_index(player_names, team_existing[i], "player"),
+            placeholder=(f"Account {team_existing[i]['account_id']}"
+                         if imported and team_existing[i] else "Choose a player"),
             key=f"{form_scope}_{team}_player_{i}", label_visibility="collapsed"))
 
         heroes_sel = field_row("Hero", "hero", lambda i, c: st.selectbox(
             "Hero", heroes,
-            index=idx_of(heroes, team_existing[i]["hero"] if team_existing[i] else None),
+            index=slot_index(heroes, team_existing[i], "hero"),
             key=f"{form_scope}_{team}_hero_{i}", label_visibility="collapsed"))
 
         slots_sel = field_row("Draft Slot", "slot", lambda i, c: st.number_input(
@@ -200,6 +263,9 @@ with st.form("match_form", clear_on_submit=False):
 
         for i in range(6):
             all_rows.append({"team": team, "player": players_sel[i], "hero": heroes_sel[i],
+                              "account_id": team_existing[i].get("account_id") if team_existing[i] else None,
+                              "was_unlinked": bool(imported and team_existing[i]
+                                                   and team_existing[i]["player"] is None),
                               "kills": kills_sel[i], "deaths": deaths_sel[i], "assists": assists_sel[i],
                               "souls_k": souls_sel[i], "plr_damage_k": plr_sel[i],
                               "obj_damage_k": obj_sel[i], "healing_k": heal_sel[i],
@@ -207,8 +273,8 @@ with st.form("match_form", clear_on_submit=False):
 
     st.divider()
     c1, c2 = st.columns(2)
-    default_bans = existing_match.get("bans", []) if existing_match else []
-    default_fps = existing_match.get("first_picks", []) if existing_match else []
+    default_bans = prefill.get("bans", []) if prefill else []
+    default_fps = prefill.get("first_picks", []) if prefill else []
     bans = c1.multiselect("Bans", heroes, default=[b for b in default_bans if b in heroes])
     first_picks = c2.multiselect("First picks (draft order not tracked)", heroes,
                                   default=[f for f in default_fps if f in heroes])
@@ -217,21 +283,29 @@ with st.form("match_form", clear_on_submit=False):
 
     default_mvp = "None"
     default_keys = []
-    if existing_match:
-        mvps = [p["player"] for p in existing_match["players"] if p.get("mvp")]
+    if prefill:
+        mvps = [p["player"] for p in prefill["players"] if p.get("mvp") and p["player"]]
         if mvps:
             default_mvp = mvps[0]
-        default_keys = [p["player"] for p in existing_match["players"] if p.get("key_player")]
+        default_keys = [p["player"] for p in prefill["players"] if p.get("key_player") and p["player"]]
 
-    mvp = st.selectbox("MVP", ["None"] + player_names, index=idx_of(["None"] + player_names, default_mvp))
+    # Keyed per form_scope for the same reason as the box score: without a key a fresh fetch
+    # would be ignored in favour of whatever these boxes held a run ago.
+    mvp = st.selectbox("MVP", ["None"] + player_names, index=idx_of(["None"] + player_names, default_mvp),
+                       key=f"{form_scope}_mvp")
     key_players = st.multiselect("Key Players (pick exactly 2)", player_names,
-                                  default=[k for k in default_keys if k in player_names])
+                                  default=[k for k in default_keys if k in player_names],
+                                  key=f"{form_scope}_key_players")
 
     submit_label = "Save changes" if editing else "Save match"
     submitted = st.form_submit_button(submit_label)
 
     if submitted:
         errors = []
+        if any(r["player"] is None for r in all_rows):
+            errors.append("Every Player slot needs someone in it.")
+        if any(r["hero"] is None for r in all_rows):
+            errors.append("Every Hero slot needs a hero.")
         if not match_id.strip():
             errors.append("Match ID is required")
         if mvp != "None" and mvp not in all_player_names_in_match:
@@ -240,7 +314,7 @@ with st.form("match_form", clear_on_submit=False):
             errors.append("All Key Players must be players in this match.")
         if len(key_players) != 2:
             errors.append("Please select exactly 2 Key Players.")
-        if len(set(all_player_names_in_match)) != 12:
+        if None not in all_player_names_in_match and len(set(all_player_names_in_match)) != 12:
             errors.append("Each of the 12 slots must have a unique player.")
         if not editing and any(m["match_id"] == match_id for m in matches):
             errors.append(f"Match ID {match_id} already exists.")
@@ -278,8 +352,16 @@ with st.form("match_form", clear_on_submit=False):
             if editing:
                 ui.report_save(lambda: data_io.update_match(match_id, new_match),
                                f"Match {match_id} updated!")
-            else:
-                ui.report_save(lambda: data_io.add_match(new_match),
-                               f"Match {match_id} saved!", celebrate=True)
+            elif ui.report_save(lambda: data_io.add_match(new_match),
+                                f"Match {match_id} saved!", celebrate=True):
+                # After the match, not before: link_account re-keys a nickname-keyed player and
+                # rewrites their match rows, and that sweep has to see this match to move it.
+                for r in all_rows:
+                    if r["was_unlinked"] and r["account_id"]:
+                        ui.report_save(
+                            lambda r=r: data_io.link_account(players_dict[r["player"]]["player_key"],
+                                                             r["account_id"]),
+                            f"Linked account {r['account_id']} to {r['player']}.")
+                st.session_state.pop("imported_match", None)
 
 ui.brand_footer()

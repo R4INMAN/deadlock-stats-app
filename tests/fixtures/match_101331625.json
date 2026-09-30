@@ -1,0 +1,236 @@
+{
+ "match_id": 101331625,
+ "start_time": 1787538959,
+ "duration_s": 1693,
+ "winning_team": 1,
+ "players": [
+  {
+   "account_id": 106168694,
+   "team": 1,
+   "player_slot": 7,
+   "hero_id": 2,
+   "mvp_rank": 1,
+   "kills": 8,
+   "deaths": 3,
+   "assists": 17,
+   "net_worth": 32905,
+   "stats": [
+    {
+     "player_damage": 44505,
+     "boss_damage": 10856,
+     "player_healing": 8273,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 74203513,
+   "team": 0,
+   "player_slot": 6,
+   "hero_id": 81,
+   "mvp_rank": null,
+   "kills": 7,
+   "deaths": 8,
+   "assists": 11,
+   "net_worth": 27939,
+   "stats": [
+    {
+     "player_damage": 33705,
+     "boss_damage": 877,
+     "player_healing": 11168,
+     "player_barriering": 8385
+    }
+   ]
+  },
+  {
+   "account_id": 104463259,
+   "team": 0,
+   "player_slot": 1,
+   "hero_id": 12,
+   "mvp_rank": null,
+   "kills": 7,
+   "deaths": 9,
+   "assists": 10,
+   "net_worth": 29051,
+   "stats": [
+    {
+     "player_damage": 20200,
+     "boss_damage": 1780,
+     "player_healing": 19848,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 1052486325,
+   "team": 0,
+   "player_slot": 2,
+   "hero_id": 11,
+   "mvp_rank": null,
+   "kills": 3,
+   "deaths": 8,
+   "assists": 9,
+   "net_worth": 22614,
+   "stats": [
+    {
+     "player_damage": 17215,
+     "boss_damage": 247,
+     "player_healing": 9590,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 100883133,
+   "team": 1,
+   "player_slot": 11,
+   "hero_id": 18,
+   "mvp_rank": null,
+   "kills": 6,
+   "deaths": 7,
+   "assists": 17,
+   "net_worth": 30127,
+   "stats": [
+    {
+     "player_damage": 33141,
+     "boss_damage": 12352,
+     "player_healing": 18241,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 168157156,
+   "team": 0,
+   "player_slot": 4,
+   "hero_id": 66,
+   "mvp_rank": null,
+   "kills": 4,
+   "deaths": 6,
+   "assists": 9,
+   "net_worth": 32260,
+   "stats": [
+    {
+     "player_damage": 25651,
+     "boss_damage": 0,
+     "player_healing": 24766,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 753622616,
+   "team": 0,
+   "player_slot": 3,
+   "hero_id": 79,
+   "mvp_rank": 3,
+   "kills": 9,
+   "deaths": 5,
+   "assists": 16,
+   "net_worth": 35651,
+   "stats": [
+    {
+     "player_damage": 34339,
+     "boss_damage": 2166,
+     "player_healing": 8417,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 84775105,
+   "team": 1,
+   "player_slot": 10,
+   "hero_id": 35,
+   "mvp_rank": null,
+   "kills": 6,
+   "deaths": 7,
+   "assists": 16,
+   "net_worth": 26736,
+   "stats": [
+    {
+     "player_damage": 24193,
+     "boss_damage": 8712,
+     "player_healing": 3649,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 187274453,
+   "team": 1,
+   "player_slot": 12,
+   "hero_id": 1,
+   "mvp_rank": 2,
+   "kills": 9,
+   "deaths": 5,
+   "assists": 14,
+   "net_worth": 33860,
+   "stats": [
+    {
+     "player_damage": 39050,
+     "boss_damage": 17547,
+     "player_healing": 9363,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 1391675063,
+   "team": 0,
+   "player_slot": 5,
+   "hero_id": 67,
+   "mvp_rank": null,
+   "kills": 2,
+   "deaths": 7,
+   "assists": 13,
+   "net_worth": 26280,
+   "stats": [
+    {
+     "player_damage": 21654,
+     "boss_damage": 4877,
+     "player_healing": 6465,
+     "player_barriering": 7704
+    }
+   ]
+  },
+  {
+   "account_id": 1161806828,
+   "team": 1,
+   "player_slot": 8,
+   "hero_id": 31,
+   "mvp_rank": null,
+   "kills": 8,
+   "deaths": 4,
+   "assists": 10,
+   "net_worth": 30822,
+   "stats": [
+    {
+     "player_damage": 37675,
+     "boss_damage": 5985,
+     "player_healing": 19885,
+     "player_barriering": 0
+    }
+   ]
+  },
+  {
+   "account_id": 98556858,
+   "team": 1,
+   "player_slot": 9,
+   "hero_id": 64,
+   "mvp_rank": null,
+   "kills": 6,
+   "deaths": 7,
+   "assists": 13,
+   "net_worth": 26556,
+   "stats": [
+    {
+     "player_damage": 26170,
+     "boss_damage": 3678,
+     "player_healing": 5116,
+     "player_barriering": 0
+    }
+   ]
+  }
+ ]
+}
