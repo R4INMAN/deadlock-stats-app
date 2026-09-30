@@ -21,6 +21,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def main():
     from streamlit.testing.v1 import AppTest
+    from utils import data_io, github_sync
+
+    # The docstring's promise, enforced: a developer checkout often *does* have a
+    # .streamlit/secrets.toml, and with one present this walks every page over the network -
+    # slowly, and against whatever state the data branch is in. Worse, a token that has expired
+    # sends the edit pages straight to their stale-storage stop, so they would report "ok"
+    # without rendering anything.
+    github_sync._config = lambda: None
+    data_io.invalidate_cache()
 
     # The pages load art with paths relative to the repo root, and AppTest resolves a relative
     # script path against *this* file rather than the cwd - so chdir for the former and pass

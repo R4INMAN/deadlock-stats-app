@@ -9,11 +9,15 @@ if not require_edit_access():
     st.stop()
 
 ui.page_header("Match Management", "Log a new game, or fix one that went in wrong.")
-ui.storage_notice()
 
 players_dict = data_io.load_players()
 heroes = data_io.load_heroes()
 matches = data_io.load_matches()
+
+# After the loads, not before: what is stale is only known once they have tried.
+ui.storage_notice()
+ui.stop_if_stale()
+
 player_names = sorted(players_dict.keys())
 
 TEAM_A, TEAM_B = "Hidden King", "Archmother"
