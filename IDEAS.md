@@ -186,7 +186,10 @@ flags. It also carries `start_time`, so the date backfill is real.
       coincidental match. Worth knowing the class exists: a mistyped ID is invisible until
       something tries to look the match up. **S**
 
-- [ ] **Replace the 12-player form with "paste a match ID."** K/D/A, souls, heroes, teams,
+- [x] **Replace the 12-player form with "paste a match ID."** *(done — "Fetch from match ID"
+      on Add Match fills the form rather than replacing it; `to_match` in `utils/deadlock_api.py`.
+      Reproduces 726 hand-typed rows at 97–100% per field, healing 91%. Scoreboard "Healing" is
+      healing + barrier.)* K/D/A, souls, heroes, teams,
       win, duration, and MVP all arrive from the API. This is the single biggest
       quality-of-life change available. **M–L**
 - [x] **Two prerequisites**, both one-time: *(done — `account_ids` on every record in
@@ -195,7 +198,8 @@ flags. It also carries `start_time`, so the date backfill is real.
         Needs a `player → account_id` mapping table, filled in once per person.
       - *Hero aliases.* API says `Mo & Krill`, we say `Mo and Krill`. Small alias map against
         `https://assets.deadlock-api.com/v2/heroes`.
-- [ ] **Bans and first picks stay manual.** `banned_hero_ids` came back **empty** — we draft
+- [x] **Bans and first picks stay manual.** *(confirmed — no ban data in any of the 62 matches
+      the API has, so the draft section of the form stays)* `banned_hero_ids` came back **empty** — we draft
       on statlocker.gg, outside the game, so the API never sees it. Whatever the import looks
       like, the draft section of the form has to survive. **Worth confirming across a few more
       match IDs before building.**
