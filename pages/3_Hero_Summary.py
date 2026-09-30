@@ -28,7 +28,7 @@ display["avg_kp_pct"] = display["avg_kp_pct"].round(1)
 display["portrait"] = ui.hero_portrait_column(display["hero"])
 st.dataframe(
     display[["portrait", "hero", "games", "win_rate", "draft_participation_rate", "pick_rate",
-              "ban_rate", "first_pick_rate", "mvp_count", "key_player_count", "top_player",
+              "ban_rate", "first_pick_rate", "avg_dmg_per_min", "avg_healing_per_min", "mvp_count", "key_player_count", "top_player",
               "top_player_games"]]
     # Games, not draft participation: participation counts bans, so a hero the group keeps
     # banning but has barely played was topping a table meant to show who actually gets played.
@@ -43,6 +43,9 @@ st.dataframe(
         "pick_rate": st.column_config.NumberColumn("Pick rate", format="%.1f%%"),
         "ban_rate": st.column_config.NumberColumn("Ban rate", format="%.1f%%"),
         "first_pick_rate": st.column_config.NumberColumn("First pick", format="%.1f%%"),
+        "avg_dmg_per_min": st.column_config.NumberColumn("Dmg/min", format="%.0f",
+                                                         help="Player damage per minute"),
+        "avg_healing_per_min": st.column_config.NumberColumn("Heal/min", format="%.0f"),
         "mvp_count": st.column_config.NumberColumn("MVP"),
         "key_player_count": st.column_config.NumberColumn("Key player"),
         "top_player": st.column_config.TextColumn("Top player"),
@@ -81,6 +84,8 @@ else:
                 "wins": st.column_config.NumberColumn("Wins"),
                 "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
                 "avg_kp_pct": st.column_config.NumberColumn("Avg KP%", format="%.1f"),
+                "avg_dmg_per_min": st.column_config.NumberColumn("Dmg/min", format="%.0f"),
+                "avg_healing_per_min": st.column_config.NumberColumn("Heal/min", format="%.0f"),
             },
         )
 

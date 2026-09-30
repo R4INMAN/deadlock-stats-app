@@ -11,6 +11,15 @@ def _game_length_minutes(s):
         return None
 
 
+# {stored per-game total, in thousands: per-minute rate column}
+PER_MIN_RATES = {
+    "souls_k": "souls_per_min",
+    "plr_damage_k": "dmg_per_min",
+    "obj_damage_k": "obj_dmg_per_min",
+    "healing_k": "healing_per_min",
+}
+
+
 def matches_to_rows_df(matches):
     """Flatten matches -> one row per player-per-game, with match-level fields joined in."""
     rows = []
@@ -22,8 +31,10 @@ def matches_to_rows_df(matches):
             row["date"] = m.get("date")
             row["game_length"] = m.get("game_length")
             row["game_length_min"] = length_min
-            row["souls_per_min"] = (p["souls_k"] / length_min) if (p.get("souls_k") is not None and length_min) else None
-            row["obj_dmg_per_min"] = (p["obj_damage_k"] / length_min) if (p.get("obj_damage_k") is not None and length_min) else None
+            # Stored in thousands, shown per minute in plain units - "1,080 souls/min" is how the
+            # game itself reports it, where "1.1" read as nothing in particular.
+            for field, rate in PER_MIN_RATES.items():
+                row[rate] = (p[field] * 1000 / length_min) if (p.get(field) is not None and length_min) else None
             rows.append(row)
     return pd.DataFrame(rows)
 
@@ -65,7 +76,9 @@ def player_summary_table(df):
         wins=("win", "sum"),
         avg_kp_pct=("kp_pct", "mean"),
         avg_souls_per_min=("souls_per_min", "mean"),
+        avg_dmg_per_min=("dmg_per_min", "mean"),
         avg_obj_dmg_per_min=("obj_dmg_per_min", "mean"),
+        avg_healing_per_min=("healing_per_min", "mean"),
         avg_kills=("kills", "mean"),
         avg_deaths=("deaths", "mean"),
         avg_assists=("assists", "mean"),
@@ -101,7 +114,9 @@ def player_detail(df, player, total_matches):
     games = len(pdf)
     hero_breakdown = pdf.groupby("hero").agg(
         games=("win", "size"), wins=("win", "sum"),
-        avg_kp_pct=("kp_pct", "mean"), mvp_count=("mvp", "sum"), key_player_count=("key_player", "sum"),
+        avg_kp_pct=("kp_pct", "mean"), avg_dmg_per_min=("dmg_per_min", "mean"),
+        avg_healing_per_min=("healing_per_min", "mean"),
+        mvp_count=("mvp", "sum"), key_player_count=("key_player", "sum"),
     ).reset_index()
     hero_breakdown["win_rate"] = hero_breakdown["wins"] / hero_breakdown["games"]
     hero_breakdown = hero_breakdown.sort_values("games", ascending=False)
@@ -114,7 +129,9 @@ def player_detail(df, player, total_matches):
         "win_rate": pdf["win"].sum() / games,
         "avg_kp_pct": pdf["kp_pct"].mean(),
         "avg_souls_per_min": pdf["souls_per_min"].mean(),
+        "avg_dmg_per_min": pdf["dmg_per_min"].mean(),
         "avg_obj_dmg_per_min": pdf["obj_dmg_per_min"].mean(),
+        "avg_healing_per_min": pdf["healing_per_min"].mean(),
         "avg_kills": pdf["kills"].mean(),
         "avg_deaths": pdf["deaths"].mean(),
         "avg_assists": pdf["assists"].mean(),
@@ -175,6 +192,8 @@ def hero_summary_table(df, total_matches, matches=None, heroes_list=None):
             "top_player": top_player,
             "top_player_games": top_player_games,
             "avg_kp_pct": hdf["kp_pct"].mean() if games else None,
+            "avg_dmg_per_min": hdf["dmg_per_min"].mean() if games else None,
+            "avg_healing_per_min": hdf["healing_per_min"].mean() if games else None,
         })
     return pd.DataFrame(rows).sort_values("games", ascending=False)
 
@@ -183,6 +202,7 @@ def hero_detail(df, hero, total_matches, matches=None):
     hdf = df[df["hero"] == hero]
     player_breakdown = hdf.groupby("player").agg(
         games=("win", "size"), wins=("win", "sum"), avg_kp_pct=("kp_pct", "mean"),
+        avg_dmg_per_min=("dmg_per_min", "mean"), avg_healing_per_min=("healing_per_min", "mean"),
     ).reset_index()
     if not player_breakdown.empty:
         player_breakdown["win_rate"] = player_breakdown["wins"] / player_breakdown["games"]
@@ -299,7 +319,9 @@ def player_stat_over_time(df, player, stat="win_rate", window=10):
         "win_rate": "win",
         "avg_kp_pct": "kp_pct",
         "avg_souls_per_min": "souls_per_min",
+        "avg_dmg_per_min": "dmg_per_min",
         "avg_obj_dmg_per_min": "obj_dmg_per_min",
+        "avg_healing_per_min": "healing_per_min",
         "avg_kills": "kills",
         "avg_deaths": "deaths",
         "avg_assists": "assists",

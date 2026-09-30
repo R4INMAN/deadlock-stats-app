@@ -1,5 +1,6 @@
 import streamlit as st
 import altair as alt
+import pandas as pd
 from utils import data_io, stats, theme, ui
 
 st.set_page_config(page_title="Player Stats", page_icon="assets/ui/puddle_punch.png", layout="wide")
@@ -21,12 +22,12 @@ summary = stats.player_summary_table(df)
 display = summary.copy()
 display["win_rate"] = (display["win_rate"] * 100).round(1)
 display["award_rate"] = (display["award_rate"] * 100).round(1)
-for c in ["avg_kp_pct", "avg_souls_per_min", "avg_obj_dmg_per_min", "avg_kills", "avg_deaths", "avg_assists"]:
+for c in ["avg_kp_pct", "avg_kills", "avg_deaths", "avg_assists"]:
     display[c] = display[c].round(2)
 display["hero_portrait"] = ui.hero_portrait_column(display["most_played_hero"])
 st.dataframe(
     display[["hero_portrait", "player", "games", "win_rate", "hero_variety", "most_played_hero",
-              "avg_kp_pct", "avg_souls_per_min", "mvp_count", "key_player_count", "award_rate"]],
+              "avg_kp_pct", "avg_souls_per_min", "avg_dmg_per_min", "avg_healing_per_min", "mvp_count", "key_player_count", "award_rate"]],
     width='stretch', hide_index=True,
     column_config={
         "hero_portrait": st.column_config.ImageColumn("", width="small",
@@ -37,7 +38,10 @@ st.dataframe(
         "hero_variety": st.column_config.NumberColumn("Heroes"),
         "most_played_hero": st.column_config.TextColumn("Most played"),
         "avg_kp_pct": st.column_config.NumberColumn("Avg KP%", format="%.1f"),
-        "avg_souls_per_min": st.column_config.NumberColumn("Souls/min", format="%.1f"),
+        "avg_souls_per_min": st.column_config.NumberColumn("Souls/min", format="%.0f"),
+        "avg_dmg_per_min": st.column_config.NumberColumn("Dmg/min", format="%.0f",
+                                                         help="Player damage per minute"),
+        "avg_healing_per_min": st.column_config.NumberColumn("Heal/min", format="%.0f"),
         "mvp_count": st.column_config.NumberColumn("MVP"),
         "key_player_count": st.column_config.NumberColumn("Key player"),
         "award_rate": st.column_config.NumberColumn("Award rate", format="%.1f%%"),
@@ -73,12 +77,15 @@ else:
     c4.metric("MVPs", detail["mvp_count"])
     c5.metric("Key Player awards", detail["key_player_count"])
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Avg Souls/min",
-              f"{detail['avg_souls_per_min']:.1f}" if detail['avg_souls_per_min'] else "n/a")
-    c2.metric("Avg Obj Dmg/min",
-              f"{detail['avg_obj_dmg_per_min']:.1f}" if detail['avg_obj_dmg_per_min'] else "n/a")
-    c3.metric("Hero variety", detail["hero_variety"])
+    def per_min(value):
+        return f"{value:,.0f}" if pd.notna(value) else "n/a"
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Avg Souls/min", per_min(detail["avg_souls_per_min"]))
+    c2.metric("Avg Dmg/min", per_min(detail["avg_dmg_per_min"]))
+    c3.metric("Avg Heal/min", per_min(detail["avg_healing_per_min"]))
+    c4.metric("Avg Obj Dmg/min", per_min(detail["avg_obj_dmg_per_min"]))
+    c5.metric("Hero variety", detail["hero_variety"])
 
     if rank:
         st.caption(f"Current reported rank: **{rank}**")
@@ -105,7 +112,7 @@ else:
     hero_display["portrait"] = ui.hero_portrait_column(hero_display["hero"])
     st.dataframe(
         hero_display[["portrait", "hero", "games", "wins", "win_rate", "avg_kp_pct",
-                       "mvp_count", "key_player_count"]],
+                       "avg_dmg_per_min", "avg_healing_per_min", "mvp_count", "key_player_count"]],
         width='stretch', hide_index=True,
         column_config={
             "portrait": st.column_config.ImageColumn("", width="small"),
@@ -114,6 +121,8 @@ else:
             "wins": st.column_config.NumberColumn("Wins"),
             "win_rate": st.column_config.NumberColumn("Win rate", format="%.1f%%"),
             "avg_kp_pct": st.column_config.NumberColumn("Avg KP%", format="%.1f"),
+            "avg_dmg_per_min": st.column_config.NumberColumn("Dmg/min", format="%.0f"),
+            "avg_healing_per_min": st.column_config.NumberColumn("Heal/min", format="%.0f"),
             "mvp_count": st.column_config.NumberColumn("MVP"),
             "key_player_count": st.column_config.NumberColumn("Key player"),
         },
@@ -124,6 +133,8 @@ else:
         "Win rate": "win_rate",
         "Avg KP%": "avg_kp_pct",
         "Avg Souls/min": "avg_souls_per_min",
+        "Avg Dmg/min": "avg_dmg_per_min",
+        "Avg Heal/min": "avg_healing_per_min",
         "Avg Obj Dmg/min": "avg_obj_dmg_per_min",
         "Avg Kills": "avg_kills",
         "Avg Deaths": "avg_deaths",

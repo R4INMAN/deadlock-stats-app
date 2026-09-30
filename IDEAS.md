@@ -41,7 +41,8 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 - [x] **`draft_slot` is hardcoded to `None` for new matches** (`pages/8_Add_Match.py:198`).
       All 82 imported matches have slots 1–12; every match added since loses it. One form
       field to stop the bleed. **S**
-- [ ] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** We pay the
+- [x] **`plr_damage_k` and `healing_k` are entered but never displayed anywhere.** *(done —
+      Dmg/min and Heal/min on the Player and Hero pages, including the trend chart)* We pay the
       data-entry cost and show none of it. Add to player detail + hero tables as per-minute
       rates, alongside the souls/obj-damage rates that already exist. Struck through in `2228113`
       as done, but neither field appears anywhere in the code - still open. Healing is non-zero in
@@ -85,7 +86,8 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 
 ## Tier 1 — Surface what we already have
 
-- [ ] **Per-minute everything.** `souls_per_min` and `obj_dmg_per_min` exist in
+- [x] **Per-minute everything.** *(done — all four rates come from `PER_MIN_RATES` in
+      `utils/stats.py`, now in plain units: 1,080 souls/min rather than 1.1)* `souls_per_min` and `obj_dmg_per_min` exist in
       `matches_to_rows_df` but only appear on two tables. Damage/min and healing/min are
       one line each and make roles comparable across 25-minute stomps and 45-minute slogs. **S**
 - [ ] **Lobby-relative stats.** Raw KP% and souls/min are hard to read cold. Show each
@@ -128,12 +130,13 @@ Sizes: **S** = an evening, **M** = a weekend, **L** = a real project.
 The group can handle real methods; these mostly need a short "here's what this means" caption
 rather than simplification.
 
-- [ ] **Shrunk win rates (empirical Bayes).** 80 distinct players, only ~30 with 10+ games.
+- [~] **~~Shrunk win rates (empirical Bayes).~~** *Declined — needlessly complicates a board
+      that should read at a glance.* 80 distinct players, only ~30 with 10+ games.
       The leaderboard currently gates at `MIN_GAMES = 10`, which is honest but throws away
       the tail. Shrinking each player toward the global mean with a Beta prior fit on the
       observed distribution keeps everyone on one board and stops 3-0 players from topping it.
       Show raw and shrunk side by side — the gap between them is itself interesting. **M**
-- [ ] **Uncertainty as a first-class visual.** Bootstrap or Beta-posterior intervals drawn
+- [~] **~~Uncertainty as a first-class visual.~~** *Declined with shrunk win rates, same reason.* Bootstrap or Beta-posterior intervals drawn
       as error bars / a caterpillar plot instead of point estimates. The single best cure for
       "why is my win rate bouncing around." Also the most useful dataviz exercise on this
       list. **M**
@@ -186,7 +189,8 @@ flags. It also carries `start_time`, so the date backfill is real.
 - [ ] **Replace the 12-player form with "paste a match ID."** K/D/A, souls, heroes, teams,
       win, duration, and MVP all arrive from the API. This is the single biggest
       quality-of-life change available. **M–L**
-- [ ] **Two prerequisites**, both one-time:
+- [x] **Two prerequisites**, both one-time: *(done — `account_ids` on every record in
+      `players.json`, and `HERO_ALIASES` in `utils/deadlock_api.py`)*
       - *Identity map.* We key players by nickname, the API keys them by Steam `account_id`.
         Needs a `player → account_id` mapping table, filled in once per person.
       - *Hero aliases.* API says `Mo & Krill`, we say `Mo and Krill`. Small alias map against
