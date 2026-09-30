@@ -9,11 +9,15 @@ if not require_edit_access():
     st.stop()
 
 ui.page_header("Match Management", "Log a new game, or fix one that went in wrong.")
-ui.storage_notice()
 
 players_dict = data_io.players_by_name()
 heroes = data_io.load_heroes()
 matches = data_io.load_matches()
+
+# After the loads, not before: what is stale is only known once they have tried.
+ui.storage_notice()
+ui.stop_if_stale()
+
 player_names = sorted(players_dict.keys())
 
 TEAM_A, TEAM_B = "Hidden King", "Archmother"
@@ -53,10 +57,33 @@ if editing:
     edit_id = st.selectbox("Select match to edit", match_ids)
     existing_match = next(m for m in matches if m["match_id"] == edit_id)
 
+# Streamlit keeps a *keyed* widget's value in session state and, from its second run onward,
+# ignores the `index=` / `value=` the script passes. Every box-score field below needs a key -
+# six identical widgets in a row cannot be told apart without one - so the whole box score sat
+# on whatever the Add form had last left in it, while the unkeyed fields above (date, length,
+# winner, MVP) picked the chosen match up correctly. That is the reported "editing a match
+# fills in the date but not the heroes", and it is why fixing a date meant retyping 12 players.
+# Naming the keys after the match makes each selection a fresh set of widgets, and a fresh
+# widget does read the default it is given.
+form_scope = f"edit_{edit_id}" if editing else "add"
+
 if len(player_names) < 12:
     st.warning("You need at least 12 players logged (6 per side) before adding a match. Use **Add Player / Hero** first.")
 if len(heroes) < 12:
     st.warning("You need at least 12 heroes logged before adding a match. Use **Add Player / Hero** first.")
+
+# A name the dropdowns no longer offer cannot be pre-selected, so the slot falls back to the
+# first option - and saving would quietly rewrite that row to somebody else. Say so instead.
+if existing_match:
+    unknown = sorted({p["player"] for p in existing_match["players"] if p["player"] not in player_names}
+                     | {p["hero"] for p in existing_match["players"] if p["hero"] not in heroes})
+    if unknown:
+        st.warning(
+            f"**{', '.join(unknown)}** " + ("is" if len(unknown) == 1 else "are") +
+            " no longer in the player/hero lists, so those slots could not be filled in and are "
+            "showing the first option instead. Fix them before saving, or the match will be "
+            "rewritten with the wrong name."
+        )
 
 st.caption("Enter all 12 players' stats, then bans, first picks, MVP, and Key Players at the bottom.")
 
@@ -123,53 +150,53 @@ with st.form("match_form", clear_on_submit=False):
         players_sel = field_row("Player", "player", lambda i, c: st.selectbox(
             "Player", player_names,
             index=idx_of(player_names, team_existing[i]["player"] if team_existing[i] else None),
-            key=f"{team}_player_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_player_{i}", label_visibility="collapsed"))
 
         heroes_sel = field_row("Hero", "hero", lambda i, c: st.selectbox(
             "Hero", heroes,
             index=idx_of(heroes, team_existing[i]["hero"] if team_existing[i] else None),
-            key=f"{team}_hero_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_hero_{i}", label_visibility="collapsed"))
 
         slots_sel = field_row("Draft Slot", "slot", lambda i, c: st.number_input(
             "Draft Slot", min_value=1, max_value=12, step=1,
             value=(team_existing[i]["draft_slot"] if team_existing[i] and team_existing[i].get("draft_slot") else
                    (i + 1 if team == TEAM_A else i + 7)),
-            key=f"{team}_slot_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_slot_{i}", label_visibility="collapsed"))
 
         kills_sel = field_row("Kills", "k", lambda i, c: st.number_input(
             "Kills", min_value=0, step=1,
             value=team_existing[i]["kills"] if team_existing[i] else 0,
-            key=f"{team}_k_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_k_{i}", label_visibility="collapsed"))
 
         deaths_sel = field_row("Deaths", "d", lambda i, c: st.number_input(
             "Deaths", min_value=0, step=1,
             value=team_existing[i]["deaths"] if team_existing[i] else 0,
-            key=f"{team}_d_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_d_{i}", label_visibility="collapsed"))
 
         assists_sel = field_row("Assists", "a", lambda i, c: st.number_input(
             "Assists", min_value=0, step=1,
             value=team_existing[i]["assists"] if team_existing[i] else 0,
-            key=f"{team}_a_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_a_{i}", label_visibility="collapsed"))
 
         souls_sel = field_row("Souls (k)", "souls", lambda i, c: st.number_input(
             "Souls (k)", min_value=0.0, step=1.0,
             value=float(team_existing[i]["souls_k"]) if team_existing[i] and team_existing[i].get("souls_k") is not None else 0.0,
-            key=f"{team}_souls_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_souls_{i}", label_visibility="collapsed"))
 
         plr_sel = field_row("Plyr Dmg (k)", "plr", lambda i, c: st.number_input(
             "Plyr Dmg (k)", min_value=0.0, step=1.0,
             value=float(team_existing[i]["plr_damage_k"]) if team_existing[i] and team_existing[i].get("plr_damage_k") is not None else 0.0,
-            key=f"{team}_plr_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_plr_{i}", label_visibility="collapsed"))
 
         obj_sel = field_row("Obj Dmg (k)", "obj", lambda i, c: st.number_input(
             "Obj Dmg (k)", min_value=0.0, step=1.0,
             value=float(team_existing[i]["obj_damage_k"]) if team_existing[i] and team_existing[i].get("obj_damage_k") is not None else 0.0,
-            key=f"{team}_obj_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_obj_{i}", label_visibility="collapsed"))
 
         heal_sel = field_row("Healing (k)", "heal", lambda i, c: st.number_input(
             "Healing (k)", min_value=0.0, step=1.0,
             value=float(team_existing[i]["healing_k"]) if team_existing[i] and team_existing[i].get("healing_k") is not None else 0.0,
-            key=f"{team}_heal_{i}", label_visibility="collapsed"))
+            key=f"{form_scope}_{team}_heal_{i}", label_visibility="collapsed"))
 
         for i in range(6):
             all_rows.append({"team": team, "player": players_sel[i], "hero": heroes_sel[i],

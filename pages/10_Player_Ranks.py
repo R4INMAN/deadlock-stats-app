@@ -8,10 +8,14 @@ if not require_edit_access():
     
 st.set_page_config(page_title="Player Ranks", page_icon="assets/ui/puddle_punch.png", layout="wide")
 ui.page_header("Player Ranks", "Reported ranks over time.")
-ui.storage_notice()
 
 players = data_io.players_by_name()
 ranks = data_io.load_ranks()
+
+# After the loads, not before: what is stale is only known once they have tried.
+ui.storage_notice()
+ui.stop_if_stale()
+
 rank_tiers = data_io.load_rank_tiers()
 
 if not players:
