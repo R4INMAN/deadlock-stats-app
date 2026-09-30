@@ -80,7 +80,7 @@ c5.metric("Heroes played", detail["hero_variety"])
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Avg KP%", f"{detail['avg_kp_pct']:.1f}")
-c2.metric("Souls/min", f"{detail['avg_souls_per_min']:.1f}" if detail["avg_souls_per_min"] else "n/a")
+c2.metric("Souls/min", f"{detail['avg_souls_per_min']:,.0f}" if detail["avg_souls_per_min"] else "n/a")
 c3.metric(
     "Best teammate",
     best_mate["teammate"] if best_mate else "—",
