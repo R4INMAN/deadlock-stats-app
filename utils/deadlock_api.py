@@ -17,6 +17,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
+from utils import data_io, dates
+
 METADATA_URL = "https://api.deadlock-api.com/v1/matches/{}/metadata"
 HEROES_URL = "https://assets.deadlock-api.com/v2/heroes"
 HEADERS = {"User-Agent": "deadlock-stats-app/1.0 (PUG stats)"}
@@ -53,17 +55,88 @@ def our_hero_name_matches(ours, hero_id):
     return HERO_ALIASES.get(ours, ours) == hero_names().get(hero_id)
 
 
-def match_players(match_id):
-    """The 12 per-player rows for a match, or None when the API does not have it."""
+def match_info(match_id):
+    """The full `match_info` payload for a match, or None when the API does not have it."""
     try:
         r = requests.get(METADATA_URL.format(match_id), headers=HEADERS, timeout=TIMEOUT)
         if r.status_code != 200:
             return None
-        players = r.json().get("match_info", {}).get("players", [])
-        rows = [{k: p.get(k) for k in PLAYER_FIELDS} for p in players]
-        return rows or None
+        return r.json().get("match_info") or None
     except (requests.RequestException, ValueError):
         return None
+
+
+def match_players(match_id):
+    """The 12 per-player rows for a match, or None when the API does not have it."""
+    players = (match_info(match_id) or {}).get("players", [])
+    rows = [{k: p.get(k) for k in PLAYER_FIELDS} for p in players]
+    return rows or None
+
+
+# ---------------------------------------------------------------- the match importer
+
+# The API numbers the sides; we name them. Checked against every match we had logged by hand.
+TEAM_NAMES = {0: "Hidden King", 1: "Archmother"}
+
+
+def our_hero_name(hero_id, heroes):
+    """Our name for an API hero id, or None for a hero we have not added - a new release.
+
+    Read from the vendored hero_visuals.json rather than the assets endpoint, which lives on a
+    different host: importing a match should not fail because the portrait server is down.
+    """
+    by_id = {v.get("id"): name for name, v in data_io.load_hero_visuals().items()}
+    name = by_id.get(hero_id)
+    return name if name in heroes else None
+
+
+def _k(value):
+    return round((value or 0) / 1000, 1)
+
+
+def to_match(info, players, heroes):
+    """An API `match_info` payload as a match in our own shape, ready to fill the form.
+
+    Each player row carries its `account_id`, and `player` is None where no record owns that
+    account yet - the form leaves that slot for a person to fill, then links the account so the
+    next import knows them. `hero` is likewise None for a hero we have not added.
+
+    Every column maps onto what the post-game scoreboard shows, which is what we used to type:
+    souls are `net_worth`, objective damage is `boss_damage`, and "Healing" is healing *plus*
+    barrier - `player_healing` alone came in low for exactly the heroes that shield. Measured
+    against the hand-entered rows it reproduces, see tests/test_import.py.
+    """
+    winning_team = info.get("winning_team")
+    rows = []
+    for p in sorted(info.get("players", []), key=lambda p: (p.get("team"), p.get("player_slot") or 0)):
+        final = (p.get("stats") or [{}])[-1]
+        key = data_io.key_for_account(p["account_id"], players)
+        rows.append({
+            "team": TEAM_NAMES.get(p.get("team")),
+            "account_id": str(p["account_id"]),
+            "player": players[key].get("display_name", key) if key else None,
+            "hero": our_hero_name(p.get("hero_id"), heroes),
+            "hero_id": p.get("hero_id"),
+            "win": p.get("team") == winning_team,
+            "mvp": p.get("mvp_rank") == 1,
+            "key_player": p.get("mvp_rank") in (2, 3),
+            "kills": p.get("kills") or 0,
+            "deaths": p.get("deaths") or 0,
+            "assists": p.get("assists") or 0,
+            "souls_k": _k(p.get("net_worth")),
+            "plr_damage_k": _k(final.get("player_damage")),
+            "obj_damage_k": _k(final.get("boss_damage")),
+            "healing_k": _k((final.get("player_healing") or 0) + (final.get("player_barriering") or 0)),
+        })
+
+    minutes, seconds = divmod(int(info.get("duration_s") or 0), 60)
+    start = info.get("start_time")
+    return {
+        "match_id": str(info.get("match_id")),
+        "date": dates.local_date(start) if start else None,
+        "game_length": f"{minutes}:{seconds:02d}",
+        "players": rows,
+    }
 
 
 def match_players_cached(match_ids, cache_file):

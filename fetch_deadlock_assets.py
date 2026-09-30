@@ -110,6 +110,9 @@ def fetch_heroes():
             download(images["icon_image_small"], os.path.join(PORTRAIT_DIR, portrait_name))
 
         visuals[hero] = {
+            # The match importer translates the API's hero_id with this, so importing a match
+            # costs one request instead of two.
+            "id": api_hero.get("id"),
             "color": (api_hero.get("colors") or {}).get("style_hex"),
             "portrait": portrait_name,
         }
