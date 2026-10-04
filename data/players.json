@@ -1015,5 +1015,14 @@
     ],
     "notes": "",
     "reported_rank": null
+  },
+  "GymSocks": {
+    "display_name": "GymSocks",
+    "account_ids": [],
+    "aliases": [
+      "GymSocks"
+    ],
+    "notes": "",
+    "reported_rank": null
   }
 }
