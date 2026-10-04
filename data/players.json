@@ -1056,9 +1056,11 @@
     "notes": "",
     "reported_rank": null
   },
-  "Legally Blind Plush Dragon": {
+  "195797930": {
     "display_name": "Legally Blind Plush Dragon",
-    "account_ids": [],
+    "account_ids": [
+      "195797930"
+    ],
     "aliases": [
       "Legally Blind Plush Dragon"
     ],
