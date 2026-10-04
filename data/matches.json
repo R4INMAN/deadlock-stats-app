@@ -19928,7 +19928,7 @@
         "obj_damage_k": 1.3,
         "healing_k": 1.6,
         "draft_slot": 5,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Hidden King",
@@ -20201,7 +20201,7 @@
         "obj_damage_k": 4.5,
         "healing_k": 3.2,
         "draft_slot": 4,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Hidden King",
@@ -20582,7 +20582,7 @@
         "obj_damage_k": 1.3,
         "healing_k": 3.0,
         "draft_slot": 6,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Archmother",
@@ -20837,7 +20837,7 @@
         "obj_damage_k": 4.2,
         "healing_k": 8.8,
         "draft_slot": 3,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       }
     ],
     "bans": [
@@ -20984,7 +20984,7 @@
         "obj_damage_k": 0.1,
         "healing_k": 0.1,
         "draft_slot": 3,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Archmother",
@@ -21203,7 +21203,7 @@
         "obj_damage_k": 1.8,
         "healing_k": 20.0,
         "draft_slot": 8,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Archmother",
@@ -21896,7 +21896,7 @@
         "obj_damage_k": 9.5,
         "healing_k": 4.2,
         "draft_slot": 5,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Hidden King",
@@ -22133,7 +22133,7 @@
         "obj_damage_k": 18.0,
         "healing_k": 58.0,
         "draft_slot": 1,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Hidden King",
@@ -22298,7 +22298,7 @@
         "obj_damage_k": 2.3,
         "healing_k": 34.0,
         "draft_slot": 4,
-        "player_key": "LittleMenace"
+        "player_key": "104463259"
       },
       {
         "team": "Hidden King",
@@ -23726,7 +23726,7 @@
         "team": "Hidden King",
         "player": "LittleMenace",
         "hero": "Holliday",
-        "player_key": "LittleMenace",
+        "player_key": "104463259",
         "win": true,
         "mvp": false,
         "key_player": false,
