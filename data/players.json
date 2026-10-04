@@ -943,15 +943,6 @@
     "notes": "",
     "reported_rank": null
   },
-  "Tippy": {
-    "display_name": "Tippy",
-    "account_ids": [],
-    "aliases": [
-      "Tippy"
-    ],
-    "notes": "",
-    "reported_rank": null
-  },
   "Woof Woof": {
     "display_name": "Woof Woof",
     "account_ids": [],
@@ -995,6 +986,17 @@
     ],
     "aliases": [
       "Carzzn"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "149048416": {
+    "display_name": "Tippy",
+    "account_ids": [
+      "149048416"
+    ],
+    "aliases": [
+      "Tippy"
     ],
     "notes": "",
     "reported_rank": null
