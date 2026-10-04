@@ -22625,7 +22625,7 @@
         "obj_damage_k": 2.6,
         "healing_k": 17.0,
         "draft_slot": 4,
-        "player_key": "Tippy"
+        "player_key": "149048416"
       },
       {
         "team": "Archmother",
@@ -22958,7 +22958,7 @@
         "team": "Archmother",
         "player": "Tippy",
         "hero": "Rem",
-        "player_key": "Tippy",
+        "player_key": "149048416",
         "win": false,
         "mvp": false,
         "key_player": false,
@@ -23177,7 +23177,7 @@
         "team": "Archmother",
         "player": "Tippy",
         "hero": "Paige",
-        "player_key": "Tippy",
+        "player_key": "149048416",
         "win": true,
         "mvp": false,
         "key_player": false,
