@@ -898,15 +898,6 @@
     "notes": "",
     "reported_rank": "Archon 4"
   },
-  "LittleMenace": {
-    "display_name": "LittleMenace",
-    "account_ids": [],
-    "aliases": [
-      "LittleMenace"
-    ],
-    "notes": "",
-    "reported_rank": null
-  },
   "Metrovictim2008": {
     "display_name": "Metrovictim2008",
     "account_ids": [],
@@ -1008,6 +999,17 @@
     ],
     "aliases": [
       "Enkilover"
+    ],
+    "notes": "",
+    "reported_rank": null
+  },
+  "104463259": {
+    "display_name": "LittleMenace",
+    "account_ids": [
+      "104463259"
+    ],
+    "aliases": [
+      "LittleMenace"
     ],
     "notes": "",
     "reported_rank": null
